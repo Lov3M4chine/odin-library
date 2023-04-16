@@ -12,6 +12,8 @@
     <!--Main Container-->
     <div class="flex flex-col">
 
+
+
         <!--Header-->
         <div class="bg-blue-800 w-full flex justify-center items-center gap-8 p-3">
             <p class="text-blue-300 text-3xl whitespace-nowrap flex items-center">My Library</p>
@@ -28,35 +30,44 @@
         </div>
 
         <!--Library-->
-        <div class="bg-blue-900 m-6">
-            <table class="text-blue-300 w-full">
-                <thead class="font-bold">
-                <tr>
-                    <th class="border p-2">Title</th>
-                    <th class="border p-2">Author</th>
-                    <th class="border p-2">Pages Read</th>
-                    <th class="border p-2">Total Pages</th>
-                    <th class="border p-2">Read</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td class="border p-2">The Hobbit</td>
-                    <td class="border p-2">J.R.R. Tolkien</td>
-                    <td class="text-center border p-2">0</td>
-                    <td class="text-center border p-2">295</td>
-                    <td class="text-center border p-2"><input type="checkbox"></td>
-                </tr>
-                <tr>
-                    <td class="border p-2">To Kill a Mockingbird</td>
-                    <td class="border p-2">Harper Lee</td>
-                    <td class="text-center border p-2">281</td>
-                    <td class="text-center border p-2">281</td>
-                    <td class="text-center border p-2"><input type="checkbox" checked></td>
-                </tr>
-                <!-- Add more rows for each book -->
-                </tbody>
-            </table>
+        <div class="flex">
+            <!--Sidebar-->
+            <div class="bg-blue-700 text-blue-300 w-fit h-screen flex flex-col items-center flex-nowrap whitespace-nowrap">
+                <div class="mx-3 my-2 px-2 py-1 pt-3 text-xl">Reading List</div>
+                <div class="mx-3 my-2 px-2 py-1 text-xl">Library</div>
+                <div class="mx-3 my-2 px-2 py-1 text-xl">Wishlist</div>
+            </div>
+            <!--Library Table-->
+            <div class="bg-blue-900 m-6 w-full">
+                <table class="text-blue-300 w-full">
+                    <thead class="font-bold">
+                    <tr>
+                        <th class="border p-2">Title</th>
+                        <th class="border p-2">Author</th>
+                        <th class="border p-2">Pages Read</th>
+                        <th class="border p-2">Total Pages</th>
+                        <th class="border p-2">Read</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td class="border p-2">The Hobbit</td>
+                        <td class="border p-2">J.R.R. Tolkien</td>
+                        <td class="text-center border p-2">0</td>
+                        <td class="text-center border p-2">295</td>
+                        <td class="text-center border p-2"><input type="checkbox"></td>
+                    </tr>
+                    <tr>
+                        <td class="border p-2">To Kill a Mockingbird</td>
+                        <td class="border p-2">Harper Lee</td>
+                        <td class="text-center border p-2">281</td>
+                        <td class="text-center border p-2">281</td>
+                        <td class="text-center border p-2"><input type="checkbox" checked></td>
+                    </tr>
+                    <!-- Add more rows for each book -->
+                    </tbody>
+                </table>
+            </div>                                                                                                                   
         </div>
 
         <!--Footer-->
