@@ -20,6 +20,114 @@ const cardViewBtn = document.getElementById("card-view-btn");
 const cardContainer = document.getElementById("card-container");
 let library = JSON.parse(localStorage.getItem("library")) || [];
 
+manualBtn.addEventListener("click", () => {
+  const formContainer = document.createElement("div");
+  formContainer.classList.add("fixed", "z-50", "inset-0", "flex", "justify-center", "items-center");
+
+  const form = document.createElement("form");
+  form.classList.add("bg-white", "p-6", "rounded-md", "shadow-lg", "max-w-md", "w-full", "w-96", "relative");
+  
+  const titleInput = createFormInput("Title", "text", "Unknown", "title");
+  const authorInput = createFormInput("Author", "text", "Unknown", "author");
+  const genreInput = createFormInput("Genre", "text", "Unknown", "genre");
+  const descriptionInput = createFormInput("Description", "textarea", "No description available", "description");
+  const coverInput = createFormInput("Cover URL", "text", "https://via.placeholder.com/128x197?text=No%20Image", "coverURL");
+  const pageCountInput = createFormInput("Page Count", "number", "Unkown", "pageCount");
+  const pagesReadInput = createFormInput("Pages Read", "number", "0", "pagesRead");
+  const isReadInput = createFormInput("Is Read?", "checkbox", false, "isRead");
+
+  const closeButton = document.createElement("button");
+  closeButton.classList.add("absolute", "top-2", "right-2", "text-red-600", "hover:text-red-900");
+  closeButton.innerHTML = "&times;";
+  closeButton.addEventListener("click", () => {
+    formContainer.remove();
+    overlay.classList.add("hidden");
+  });
+
+  const submitButton = document.createElement("button");
+  submitButton.type = "submit";
+  submitButton.classList.add("px-4", "py-2", "bg-blue-500", "text-white", "font-medium", "rounded-md", "hover:bg-blue-600", "transition-colors");
+  submitButton.textContent = "Add Book";
+
+  const buttonContainer = document.createElement("div");
+  buttonContainer.classList.add("flex", "justify-between", "mt-4");
+  buttonContainer.append(
+    closeButton,
+    submitButton,
+  );
+
+  form.append(closeButton, titleInput, authorInput, genreInput, descriptionInput, coverInput, pageCountInput, pagesReadInput, isReadInput, buttonContainer);
+  formContainer.appendChild(form);
+
+  overlay.classList.remove("hidden");
+  newBookModal.classList.add("hidden");
+  document.body.appendChild(formContainer);
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const formData = new FormData(form);
+    const title = formData.get("title");
+    const author = formData.get("author");
+    const genre = formData.get("genre");
+    const description = formData.get("description");
+    const coverURL = formData.get("coverURL");
+    const pageCount = formData.get("pageCount");
+    const pagesRead = formData.get("pagesRead");
+    const isRead = formData.get("isRead");
+    console.log(title, author, genre, pageCount, description, coverURL, pagesRead, isRead);
+    addBookToLibrary(title, author, genre, pageCount, description, coverURL, pagesRead, isRead);
+    formContainer.remove();
+    overlay.classList.add("hidden");
+  });
+});
+    
+
+function createFormInput(labelText, inputType, defaultValue, name) {
+  const label = document.createElement("label");
+  label.textContent = labelText;
+  label.classList.add("block", "font-semibold", "mb-2");
+
+  let input;
+  if (inputType === "textarea") {
+    input = document.createElement("textarea");
+    input.classList.add("border", "border-gray-400", "p-3", "rounded", "w-full");
+  } else {
+    input = document.createElement("input");
+    input.type = inputType;
+    input.classList.add("border", "border-gray-400", "p-3", "rounded", "w-full", "h-10");
+  }
+
+  input.value = defaultValue || "";
+  input.required = false;
+  input.name = name || "";
+
+  input.addEventListener("focus", () => {
+    if (input.value === defaultValue) {
+      input.value = "";
+    }
+  });
+
+  input.addEventListener("blur", () => {
+    if (input.value === "") {
+      input.value = defaultValue;
+    }
+  });
+
+  const container = document.createElement("div");
+  container.appendChild(label);
+  container.appendChild(input);
+
+  return container;
+}
+
+
+
+
+
+
+
+
+
 
 tableViewBtn.addEventListener("click", () => {
   table.classList.remove("hidden");
@@ -69,6 +177,11 @@ searchInput.addEventListener("keyup", (e) => {
     performSearch();
   }
 });
+
+
+
+
+
 
 function performSearch() {
   const query = searchInput.value;
@@ -202,15 +315,18 @@ function displayResults(books) {
   });
 }
 
-
-function addBookToLibrary(title, author, genre, pageCount, description, coverURL) {
+function addBookToLibrary(title, author, genre, pageCount, description, coverURL, pagesRead, isRead) {
+  console.log(title, author, genre, pageCount, description, coverURL, pagesRead, isRead);
+  
   const book = {
     title: title,
     author: author,
     totalPages: pageCount,
     genre: genre,
     description: description,
-    coverURL: coverURL
+    coverURL: coverURL,
+    pagesRead: pagesRead,
+    isRead: isRead
   };
 
   // Add the book to the library
@@ -242,10 +358,14 @@ function addBookToLibrary(title, author, genre, pageCount, description, coverURL
   // Add the new row to the table
   const tbody = document.querySelector("table tbody");
   tbody.appendChild(newRow);
+
+  // Add event listener to the checkbox to toggle the isRead property
+  const checkbox = newRow.querySelector("input[type='checkbox']");
+  checkbox.addEventListener("change", (event) => {
+    book.isRead = event.target.checked;
+    localStorage.setItem("library", JSON.stringify(library));
+  });
 }
-
-
-
 
 
 function createRow(book) {
@@ -254,7 +374,7 @@ function createRow(book) {
 
   const titleCell = document.createElement("td");
   titleCell.textContent = book.title;
-  titleCell.classList.add("px-2", "py-4", "border-gray-600", "border-r");
+  titleCell.classList.add("px-2", "py-4", "border-gray-600", "border-r", "flex", "justify-between");
 
   const authorCell = document.createElement("td");
   authorCell.textContent = book.author;
@@ -265,8 +385,17 @@ function createRow(book) {
   genreCell.classList.add("px-2", "py-4", "border-gray-600", "border-r");
 
   const pagesRead = document.createElement("td");
-  pagesRead.textContent = "0";
-  pagesRead.classList.add("text-center", "px-2", "py-4", "border-gray-600", "border-r");
+  pagesRead.classList.add("text-center");
+  const pagesReadInput = document.createElement("input");
+  pagesReadInput.type = "number";
+  pagesReadInput.value = book.pagesRead; // Set the value from the book object
+  pagesReadInput.classList.add("bg-blue-900", "w-16", "text-white");
+  pagesReadInput.addEventListener("input", () => {
+    if (parseInt(pagesReadInput.value) > parseInt(pageCountCell.textContent)) {
+      pagesReadInput.value = pageCountCell.textContent;
+    }
+  });
+  pagesRead.appendChild(pagesReadInput);
 
   const pageCountCell = document.createElement("td");
   pageCountCell.textContent = book.totalPages;
@@ -276,14 +405,31 @@ function createRow(book) {
   const readCheckbox = document.createElement("input");
   readCheckbox.type = "checkbox";
   readCell.classList.add("text-center", "px-2", "py-4", "border-gray-600", "border-r");
+  readCheckbox.addEventListener("change", () => {
+    if (!book.isRead) {
+      pagesReadInput.value = book.totalPages;
+      book.pagesRead = book.totalPages;
+    } else {
+      book.pagesRead = pagesReadInput.value;
+    }
+    book.isRead = !book.isRead;
+    localStorage.setItem("library", JSON.stringify(library));
+  });
   readCell.appendChild(readCheckbox);
 
-  const deleteCell = document.createElement("td");
+  const btnContainer = document.createElement("div");
+  btnContainer.classList.add("flex", "gap-2", "ml-5");
+  titleCell.appendChild(btnContainer);
+
+  const addToReadingListBtn = document.createElement("button");
+  addToReadingListBtn.className = "bg-green-600 text-white px-2 py-1 rounded";
+  addToReadingListBtn.textContent = "Reading List";
+  btnContainer.appendChild(addToReadingListBtn);
+
   const deleteButton = document.createElement("button");
   deleteButton.className = "bg-red-600 text-white px-2 py-1 rounded";
   deleteButton.textContent = "Delete";
-  deleteCell.classList.add("text-center", "px-2", "py-4");
-  deleteCell.appendChild(deleteButton);
+  btnContainer.appendChild(deleteButton);
 
   row.appendChild(titleCell);
   row.appendChild(authorCell);
@@ -291,7 +437,6 @@ function createRow(book) {
   row.appendChild(pagesRead);
   row.appendChild(pageCountCell);
   row.appendChild(readCell);
-  row.appendChild(deleteCell);
 
   // Increment a counter variable to determine the row number
   createRow.rowCounter = createRow.rowCounter ? createRow.rowCounter + 1 : 1;
@@ -302,41 +447,41 @@ function createRow(book) {
   } else {
     row.classList.add("bg-blue-700");
   }
-
+  
   return row;
 }
-
-
-
-
 
 function createCard(book) {
   const MAX_DESCRIPTION_LENGTH = 100; // Set the maximum length for the description
   
   const card = document.createElement("div");
-  card.classList.add("flex", "flex-col", "items-center", "bg-white", "rounded", "shadow-lg", "p-4", "m-4", "w-64");
+  card.classList.add("flex", "flex-col", "items-center", "justify-stretch", "bg-white", "rounded", "shadow-lg", "p-4", "m-4", "w-64");
   
   // Limit the description to a maximum length
   const description = book.description ? book.description.slice(0, MAX_DESCRIPTION_LENGTH) + "..." : "No description available";
   
   card.innerHTML = `
-    <img class="flex justify-center object-cover rounded" src="${book.coverURL}" alt="${book.title}">
-    <h3 class="text-xl font-semibold mb-2">${book.title}</h3>
-    <h4 class="text-lg font-medium mb-2">${book.author}</h4>
-    <p class="text-gray-700 mb-2">${book.genre}</p>
-    <p class="text-gray-700 mb-2">${description}</p>
-    <p class="text-gray-700 mb-2">${book.totalPages} pages</p>
-    <div class="flex justify-between">
-      <button class="bg-green-600 text-white px-2 py-1 rounded">Add to Reading List</button>
-      <button class="bg-red-600 text-white px-2 py-1 rounded">Delete</button>
+    <div class="card-container bg-white border border-gray-300 rounded-lg p-4 flex flex-col justify-between">
+      <div class="book-cover flex items-center justify-center">
+        <img class="rounded-md object-contain h-48 w-full" src="${book.coverURL}" alt="${book.title}">
+      </div>
+      <div class="book-details">
+        <h3 class="text-xl font-semibold mb-2">${book.title}</h3>
+        <h4 class="text-lg font-medium mb-2">${book.author}</h4>
+        <p class="text-gray-700 mb-2">${book.genre}</p>
+        <p class="text-gray-700 mb-2">${description}</p>
+        <p class="text-gray-700 mb-2">${book.totalPages} pages</p>
+      </div>
+      <div class="button-container flex justify-between mt-4">
+        <button class="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">Add to Reading List</button>
+        <button class="bg-red-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">Delete</button>
+      </div>
     </div>
-    `;
-  
-  return card;
+`;
+
+return card;
+
 }
-
-
-
 
 function addBookToReadingList(title, author, pageCount) {
   
