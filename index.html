@@ -45,11 +45,16 @@
             <div class="flex w-full relative">
                 <!--Library Table-->
                 <div class="bg-blue-900 m-6 w-full">
+                    <div class="flex justify-end mb-4">
+                        <button id="table-view-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-gray-400 mr-2">Table View</button>
+                        <button id="card-view-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-gray-400">Card View</button>
+                    </div>
                     <table class="text-blue-300 w-full">
                         <thead class="font-bold">
                         <tr>
                             <th class="border p-2">Title</th>
                             <th class="border p-2">Author</th>
+                            <th class="border p-2">Genre</th> 
                             <th class="border p-2">Pages Read</th>
                             <th class="border p-2">Total Pages</th>
                             <th class="border p-2">Read</th>
@@ -60,6 +65,9 @@
                         <!-- Add more rows for each book -->
                         </tbody>
                     </table>
+                    <div id="card-container" class="hidden flex flex-wrap gap-4">
+                        
+                    </div>
                 </div>
 
 

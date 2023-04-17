@@ -14,6 +14,23 @@ searchResults.id = "search-results";
 searchResults.className = "mt-4";
 const API_KEY = "AIzaSyBSPf38Eaiajtj2gKFGxCuXCQjJPVC6_pQ";
 const table = document.querySelector("table tbody");
+const tableViewBtn = document.getElementById("table-view-btn");
+const cardViewBtn = document.getElementById("card-view-btn");
+const cardContainer = document.getElementById("card-container");
+let library = JSON.parse(localStorage.getItem("library")) || [];
+
+
+
+
+tableViewBtn.addEventListener("click", () => {
+  table.style.display = "table";
+  cardContainer.style.display = "none";
+});
+
+cardViewBtn.addEventListener("click", () => {
+  table.style.display = "none";
+  cardContainer.style.display = "flex";
+});
 
 
 table.addEventListener("click", (event) => {
@@ -79,6 +96,8 @@ function displayResults(books) {
     const title = book.volumeInfo.title;
     const authors = book.volumeInfo.authors ? book.volumeInfo.authors.join(", ") : "Unknown";
     const pageCount = book.volumeInfo.pageCount || "Unknown";
+    const genre = book.volumeInfo.categories ? book.volumeInfo.categories.join(", ") : "Unknown";
+    const description = book.volumeInfo.description ? book.volumeInfo.description : "No description available";
     const bookImage = book.volumeInfo.imageLinks?.thumbnail || "https://via.placeholder.com/128x197?text=No%20Image";
 
     const result = document.createElement("div");
@@ -98,9 +117,12 @@ function displayResults(books) {
     const pageCountElement = document.createElement("p");
     pageCountElement.textContent = `${pageCount} pages`;
 
+    const genreElement = document.createElement("p");
+    genreElement.textContent = `Genre: ${genre}`;
+
     const detailsContainer = document.createElement("div");
     detailsContainer.className = "flex flex-col";
-    detailsContainer.append(titleElement, authorsElement, pageCountElement);
+    detailsContainer.append(titleElement, authorsElement, pageCountElement, genreElement);
 
     const imageDetailsContainer = document.createElement("div");
     imageDetailsContainer.className = "flex items-start";
@@ -111,6 +133,9 @@ function displayResults(books) {
     libraryButton.dataset.title = title;
     libraryButton.dataset.author = authors;
     libraryButton.dataset.pagecount = pageCount;
+    libraryButton.dataset.genre = genre;
+    libraryButton.dataset.description = description;
+    libraryButton.dataset.coverurl = bookImage;
     libraryButton.textContent = "Library";
 
     const readingListButton = document.createElement("button");
@@ -134,6 +159,7 @@ function displayResults(books) {
     result.append(imageDetailsContainer, buttonContainer);
     searchResults.appendChild(result);
   });
+
   // Set up the event listeners for the new buttons
   const libraryButtons = searchResults.querySelectorAll(".add-library");
   const readingListButtons = searchResults.querySelectorAll(".add-reading-list");
@@ -144,7 +170,10 @@ function displayResults(books) {
       const title = e.target.dataset.title;
       const author = e.target.dataset.author;
       const pageCount = e.target.dataset.pagecount;
-      addBookToLibrary(title, author, pageCount);
+      const genre = e.target.dataset.genre;
+      const description = e.target.dataset.description;
+      const coverURL = e.target.dataset.coverurl;
+      addBookToLibrary(title, author, pageCount, genre, description, coverURL);
       overlay.classList.add("hidden");
       searchModal.classList.add("hidden");
     });
@@ -155,8 +184,11 @@ function displayResults(books) {
       const title = e.target.dataset.title;
       const author = e.target.dataset.author;
       const pageCount = e.target.dataset.pagecount;
+      const genre = e.target.dataset.genre;
+      const description = e.target.dataset.description;
+      const coverURL = e.target.dataset.coverurl;
       addBookToReadingList(title, author, pageCount);
-      addBookToLibrary(title, author, pageCount);
+      addBookToLibrary(title, author, pageCount, genre, description, coverURL);
       overlay.classList.add("hidden");
       searchModal.classList.add("hidden");
     });
@@ -167,6 +199,9 @@ function displayResults(books) {
       const title = e.target.dataset.title;
       const author = e.target.dataset.author;
       const pageCount = e.target.dataset.pagecount;
+      const genre = e.target.dataset.genre;
+      const description = e.target.dataset.description;
+      const coverURL = e.target.dataset.coverurl;
       addBookToWishlist(title, author, pageCount);
       overlay.classList.add("hidden");
       searchModal.classList.add("hidden");
@@ -174,43 +209,105 @@ function displayResults(books) {
   });
 }
 
-function addBookToLibrary(title, author, pageCount) {
-  const table = document.querySelector("table tbody");
+
+function addBookToLibrary(title, author, pageCount, genre, description, coverURL) {
+  const book = {
+    title: title,
+    author: author,
+    totalPages: pageCount,
+    genre: genre,
+    description: description,
+    coverURL: coverURL
+  };
+
+  // Add the book to the library
+  library.push(book);
+
+  // Update localStorage
+  localStorage.setItem("library", JSON.stringify(library));
+
+  const newRow = createRow(book);
+  const newCard = createCard(book); // Create a card for the card view
+
+  // Add event listeners for add-to-reading-list and delete buttons on the card
+  newCard.querySelector(".bg-green-600").addEventListener("click", () => addToReadingList(book));
+  newCard.querySelector(".bg-red-600").addEventListener("click", () => {
+    // Remove book from the library
+    library = library.filter((b) => b !== book);
+
+    // Update localStorage
+    localStorage.setItem("library", JSON.stringify(library));
+
+    // Update the UI
+    newRow.remove();
+    newCard.remove();
+  });
+
+  // Add the generated card to the card container
+  cardContainer.appendChild(newCard);
+
+  // Add the new row to the table
+  const tbody = document.querySelector("table tbody");
+  tbody.appendChild(newRow);
+}
+
+
+
+
+
+function createRow(book) {
   const row = document.createElement("tr");
 
-  // Add buttons for Reading List and Delete
-  const readingListButton = document.createElement("button");
-  readingListButton.className = "bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 ml-2";
-  readingListButton.textContent = "Reading List";
-
-  const deleteButton = document.createElement("button");
-  deleteButton.className = "bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 ml-2";
-  deleteButton.textContent = "Delete";
-
-  // Create button container
-  const buttonContainer = document.createElement("div");
-  buttonContainer.append(readingListButton, deleteButton);
-
-  // Create title span
-  const titleSpan = document.createElement("span");
-  titleSpan.textContent = title;
-
-  // Add title cell content
   const titleCell = document.createElement("td");
-  titleCell.className = "border-solid border-2 border-gray-500 p-2 flex justify-between items-center";
-  titleCell.append(titleSpan, buttonContainer);
+  titleCell.textContent = book.title;
 
-  row.innerHTML = `
-    ${titleCell.outerHTML}
-    <td class="border p-2">${author}</td>
-    <td class="text-center border p-2">0</td>
-    <td class="text-center border p-2">${pageCount}</td>
-    <td class="text-center border p-2"><input type="checkbox"></td>
-  `;
+  const authorCell = document.createElement("td");
+  authorCell.textContent = book.author;
 
-  // Append the row to the table
-  table.appendChild(row);
+  const pageCountCell = document.createElement("td");
+  pageCountCell.textContent = book.totalPages;
+
+  const deleteCell = document.createElement("td");
+  const deleteButton = document.createElement("button");
+  deleteButton.className = "bg-red-600 text-white px-2 py-1 rounded";
+  deleteButton.textContent = "Delete";
+  deleteCell.appendChild(deleteButton);
+
+  row.appendChild(titleCell);
+  row.appendChild(authorCell);
+  row.appendChild(pageCountCell);
+  row.appendChild(deleteCell);
+
+  return row;
 }
+
+
+function createCard(book) {
+  const MAX_DESCRIPTION_LENGTH = 100; // Set the maximum length for the description
+  
+  const card = document.createElement("div");
+  card.classList.add("flex", "flex-col", "items-center", "bg-white", "rounded", "shadow-lg", "p-4", "m-4", "w-64");
+  
+  // Limit the description to a maximum length
+  const description = book.description ? book.description.slice(0, MAX_DESCRIPTION_LENGTH) + "..." : "No description available";
+  
+  card.innerHTML = `
+    <img class="flex justify-center object-cover rounded" src="${book.coverURL}" alt="${book.title}">
+    <h3 class="text-xl font-semibold mb-2">${book.title}</h3>
+    <h4 class="text-lg font-medium mb-2">${book.author}</h4>
+    <p class="text-gray-700 mb-2">${book.genre}</p>
+    <p class="text-gray-700 mb-2">${description}</p>
+    <p class="text-gray-700 mb-2">${book.totalPages} pages</p>
+    <div class="flex justify-between">
+      <button class="bg-green-600 text-white px-2 py-1 rounded">Add to Reading List</button>
+      <button class="bg-red-600 text-white px-2 py-1 rounded">Delete</button>
+    </div>
+    `;
+  
+  return card;
+}
+
+
 
 
 function addBookToReadingList(title, author, pageCount) {
@@ -228,3 +325,4 @@ function deleteBookFromLibrary(row) {
   row.remove();
   console.log("row removed");
 }
+
