@@ -65,6 +65,7 @@ function performSearch() {
 
 function displayResults(books) {
   searchResults.innerHTML = "";
+  
   books.forEach((book) => {
     const title = book.volumeInfo.title;
     const authors = book.volumeInfo.authors ? book.volumeInfo.authors.join(", ") : "Unknown";
@@ -74,21 +75,28 @@ function displayResults(books) {
     const result = document.createElement("div");
     result.className = "flex justify-between p-2 border-b border-gray-300";
     result.innerHTML = `
-      <div class="flex items-start">
-        <img src="${bookImage}" alt="${title}" class="w-16 h-24 mr-4">
-        <div>
-          <h3>${title}</h3>
-          <p>${authors}</p>
-          <p>${pageCount} pages</p>
-        </div>
+    <div class="flex items-start">
+      <img src="${bookImage}" alt="${title}" class="w-16 h-24 mr-4">
+      <div>
+        <h3>${title}</h3>
+        <p>${authors}</p>
+        <p>${pageCount} pages</p>
       </div>
-      <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" data-title="${title}" data-author="${authors}" data-pagecount="${pageCount}">Add</button>
-    `;
+    </div>
+    <div>
+      <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 add-library" data-title="${title}" data-author="${authors}" data-pagecount="${pageCount}">Library</button>
+      <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 add-reading-list" data-title="${title}" data-author="${authors}" data-pagecount="${pageCount}">Reading List</button>
+      <button class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 add-wishlist" data-title="${title}" data-author="${authors}" data-pagecount="${pageCount}">Wishlist</button>
+    </div>
+  `;
     searchResults.appendChild(result);
   });
+  // Set up the event listeners for the new buttons
+  const libraryButtons = searchResults.querySelectorAll(".add-library");
+  const readingListButtons = searchResults.querySelectorAll(".add-reading-list");
+  const wishlistButtons = searchResults.querySelectorAll(".add-wishlist");
 
-  const addButtonElements = searchResults.querySelectorAll("button");
-  addButtonElements.forEach((btn) => {
+  libraryButtons.forEach((btn) => {
     btn.addEventListener("click", (e) => {
       const title = e.target.dataset.title;
       const author = e.target.dataset.author;
@@ -98,7 +106,31 @@ function displayResults(books) {
       searchModal.classList.add("hidden");
     });
   });
+
+  readingListButtons.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const title = e.target.dataset.title;
+      const author = e.target.dataset.author;
+      const pageCount = e.target.dataset.pagecount;
+      addBookToReadingList(title, author, pageCount);
+      addBookToLibrary(title, author, pageCount);
+      overlay.classList.add("hidden");
+      searchModal.classList.add("hidden");
+    });
+  });
+
+  wishlistButtons.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const title = e.target.dataset.title;
+      const author = e.target.dataset.author;
+      const pageCount = e.target.dataset.pagecount;
+      addBookToWishlist(title, author, pageCount);
+      overlay.classList.add("hidden");
+      searchModal.classList.add("hidden");
+    });
+  });
 }
+
 
 
 function addBookToLibrary(title, author, pageCount) {
@@ -113,3 +145,17 @@ function addBookToLibrary(title, author, pageCount) {
   `;
   table.appendChild(row);
 }
+
+function addBookToReadingList(title, author, pageCount) {
+  // Add the book to the library
+  addBookToLibrary(title, author, pageCount);
+  
+  // Add the book to the reading list (You can create a separate list and display it in your UI)
+  console.log(`Book added to Reading List: ${title}`);
+}
+
+function addBookToWishlist(title, author, pageCount) {
+  // Add the book to the wishlist (You can create a separate list and display it in your UI)
+  console.log(`Book added to Wishlist: ${title}`);
+}
+

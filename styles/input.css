@@ -5,3 +5,36 @@
 tbody tr:nth-child(2n) {
     background-color: rgb(30 64 175);
   }
+
+  /* .add-library {
+    background-color: #1a202c;
+    color: #fff;
+    width:min-content;
+    height: 10vh
+  }
+  
+  .add-library:hover {
+    background-color: #2d3748;
+  }
+  
+  .add-reading-list {
+    background-color: #059669;
+    color: #fff;
+    width:min-content;
+    height: 10vh;
+  }
+  
+  .add-reading-list:hover {
+    background-color: #16a34a;
+  }
+  
+  .add-wishlist {
+    background-color: #d97706;
+    color: #fff;
+    width:min-content;
+    height: 10vh
+  }
+  
+  .add-wishlist:hover {
+    background-color: #e85d04;
+  } */
