@@ -13,33 +13,31 @@ const searchResults = document.createElement("div");
 searchResults.id = "search-results";
 searchResults.className = "mt-4";
 const API_KEY = "AIzaSyBSPf38Eaiajtj2gKFGxCuXCQjJPVC6_pQ";
-const table = document.querySelector("table tbody");
+const tbody = document.querySelector("table tbody");
+const table = document.querySelector("table");
 const tableViewBtn = document.getElementById("table-view-btn");
 const cardViewBtn = document.getElementById("card-view-btn");
 const cardContainer = document.getElementById("card-container");
 let library = JSON.parse(localStorage.getItem("library")) || [];
 
 
-
-
 tableViewBtn.addEventListener("click", () => {
-  table.style.display = "table";
+  table.classList.remove("hidden");
   cardContainer.style.display = "none";
 });
 
 cardViewBtn.addEventListener("click", () => {
-  table.style.display = "none";
+  table.classList.add("hidden");
   cardContainer.style.display = "flex";
 });
 
 
-table.addEventListener("click", (event) => {
+tbody.addEventListener("click", (event) => {
   if (event.target.matches(".bg-red-600")) {
     console.log("delete button clicked");
     deleteBookFromLibrary(event.target.closest("tr"));
   }
 });
-
 
 newBookBtn.addEventListener("click", () => {
   overlay.classList.remove("hidden");
@@ -54,6 +52,7 @@ closeNewBookModal.addEventListener("click", () => {
 searchBtn.addEventListener("click", () => {
   searchModal.classList.remove("hidden")
   newBookModal.classList.add("hidden");
+  searchModal.querySelector('.bg-white').appendChild(searchResults);
 });
 
 closeSearchModal.addEventListener("click", () => {
@@ -63,12 +62,6 @@ closeSearchModal.addEventListener("click", () => {
 
 manualBtn.addEventListener("click", () => {
   // Handle manual button click event
-});
-
-searchBtn.addEventListener("click", () => {
-  searchModal.classList.remove("hidden");
-  newBookModal.classList.add("hidden");
-  searchModal.querySelector('.bg-white').appendChild(searchResults);
 });
 
 searchInput.addEventListener("keyup", (e) => {
@@ -169,11 +162,11 @@ function displayResults(books) {
     btn.addEventListener("click", (e) => {
       const title = e.target.dataset.title;
       const author = e.target.dataset.author;
-      const pageCount = e.target.dataset.pagecount;
       const genre = e.target.dataset.genre;
+      const pageCount = e.target.dataset.pagecount;
       const description = e.target.dataset.description;
       const coverURL = e.target.dataset.coverurl;
-      addBookToLibrary(title, author, pageCount, genre, description, coverURL);
+      addBookToLibrary(title, author, genre, pageCount, description, coverURL);
       overlay.classList.add("hidden");
       searchModal.classList.add("hidden");
     });
@@ -183,12 +176,12 @@ function displayResults(books) {
     btn.addEventListener("click", (e) => {
       const title = e.target.dataset.title;
       const author = e.target.dataset.author;
-      const pageCount = e.target.dataset.pagecount;
       const genre = e.target.dataset.genre;
+      const pageCount = e.target.dataset.pagecount;
       const description = e.target.dataset.description;
       const coverURL = e.target.dataset.coverurl;
-      addBookToReadingList(title, author, pageCount);
-      addBookToLibrary(title, author, pageCount, genre, description, coverURL);
+      addBookToReadingList(title, author, genre, pageCount, description, coverURL);
+      addBookToLibrary(title, author, genre, pageCount, description, coverURL);
       overlay.classList.add("hidden");
       searchModal.classList.add("hidden");
     });
@@ -202,7 +195,7 @@ function displayResults(books) {
       const genre = e.target.dataset.genre;
       const description = e.target.dataset.description;
       const coverURL = e.target.dataset.coverurl;
-      addBookToWishlist(title, author, pageCount);
+      addBookToWishlist(title, author, genre, pageCount, description, coverURL);
       overlay.classList.add("hidden");
       searchModal.classList.add("hidden");
     });
@@ -210,7 +203,7 @@ function displayResults(books) {
 }
 
 
-function addBookToLibrary(title, author, pageCount, genre, description, coverURL) {
+function addBookToLibrary(title, author, genre, pageCount, description, coverURL) {
   const book = {
     title: title,
     author: author,
@@ -257,29 +250,64 @@ function addBookToLibrary(title, author, pageCount, genre, description, coverURL
 
 function createRow(book) {
   const row = document.createElement("tr");
+  row.classList.add("text-white", "border-gray-600", "border-b");
 
   const titleCell = document.createElement("td");
   titleCell.textContent = book.title;
+  titleCell.classList.add("px-2", "py-4", "border-gray-600", "border-r");
 
   const authorCell = document.createElement("td");
   authorCell.textContent = book.author;
+  authorCell.classList.add("px-2", "py-4", "border-gray-600", "border-r");
+
+  const genreCell = document.createElement("td");
+  genreCell.textContent = book.genre;
+  genreCell.classList.add("px-2", "py-4", "border-gray-600", "border-r");
+
+  const pagesRead = document.createElement("td");
+  pagesRead.textContent = "0";
+  pagesRead.classList.add("text-center", "px-2", "py-4", "border-gray-600", "border-r");
 
   const pageCountCell = document.createElement("td");
   pageCountCell.textContent = book.totalPages;
+  pageCountCell.classList.add("text-center", "px-2", "py-4", "border-gray-600", "border-r");
+
+  const readCell = document.createElement("td");
+  const readCheckbox = document.createElement("input");
+  readCheckbox.type = "checkbox";
+  readCell.classList.add("text-center", "px-2", "py-4", "border-gray-600", "border-r");
+  readCell.appendChild(readCheckbox);
 
   const deleteCell = document.createElement("td");
   const deleteButton = document.createElement("button");
   deleteButton.className = "bg-red-600 text-white px-2 py-1 rounded";
   deleteButton.textContent = "Delete";
+  deleteCell.classList.add("text-center", "px-2", "py-4");
   deleteCell.appendChild(deleteButton);
 
   row.appendChild(titleCell);
   row.appendChild(authorCell);
+  row.appendChild(genreCell);
+  row.appendChild(pagesRead);
   row.appendChild(pageCountCell);
+  row.appendChild(readCell);
   row.appendChild(deleteCell);
+
+  // Increment a counter variable to determine the row number
+  createRow.rowCounter = createRow.rowCounter ? createRow.rowCounter + 1 : 1;
+
+  // Use the counter to set the background color for even/odd rows
+  if (createRow.rowCounter % 2 === 0) {
+    row.classList.add("bg-blue-800");
+  } else {
+    row.classList.add("bg-blue-700");
+  }
 
   return row;
 }
+
+
+
 
 
 function createCard(book) {
