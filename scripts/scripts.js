@@ -13,6 +13,15 @@ const searchResults = document.createElement("div");
 searchResults.id = "search-results";
 searchResults.className = "mt-4";
 const API_KEY = "AIzaSyBSPf38Eaiajtj2gKFGxCuXCQjJPVC6_pQ";
+const table = document.querySelector("table tbody");
+
+
+table.addEventListener("click", (event) => {
+  if (event.target.matches(".bg-red-600")) {
+    console.log("delete button clicked");
+    deleteBookFromLibrary(event.target.closest("tr"));
+  }
+});
 
 
 newBookBtn.addEventListener("click", () => {
@@ -73,22 +82,56 @@ function displayResults(books) {
     const bookImage = book.volumeInfo.imageLinks?.thumbnail || "https://via.placeholder.com/128x197?text=No%20Image";
 
     const result = document.createElement("div");
-    result.className = "flex justify-between p-2 border-b border-gray-300";
-    result.innerHTML = `
-    <div class="flex items-start">
-      <img src="${bookImage}" alt="${title}" class="w-16 h-24 mr-4">
-      <div>
-        <h3>${title}</h3>
-        <p>${authors}</p>
-        <p>${pageCount} pages</p>
-      </div>
-    </div>
-    <div>
-      <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 add-library" data-title="${title}" data-author="${authors}" data-pagecount="${pageCount}">Library</button>
-      <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 add-reading-list" data-title="${title}" data-author="${authors}" data-pagecount="${pageCount}">Reading List</button>
-      <button class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 add-wishlist" data-title="${title}" data-author="${authors}" data-pagecount="${pageCount}">Wishlist</button>
-    </div>
-  `;
+    result.className = "flex justify-between p-2 border-b border-gray-300 g-5";
+
+    const image = document.createElement("img");
+    image.src = bookImage;
+    image.alt = title;
+    image.className = "w-16 h-24 mr-4";
+
+    const titleElement = document.createElement("h3");
+    titleElement.textContent = title;
+
+    const authorsElement = document.createElement("p");
+    authorsElement.textContent = authors;
+
+    const pageCountElement = document.createElement("p");
+    pageCountElement.textContent = `${pageCount} pages`;
+
+    const detailsContainer = document.createElement("div");
+    detailsContainer.className = "flex flex-col";
+    detailsContainer.append(titleElement, authorsElement, pageCountElement);
+
+    const imageDetailsContainer = document.createElement("div");
+    imageDetailsContainer.className = "flex items-start";
+    imageDetailsContainer.append(image, detailsContainer);
+
+    const libraryButton = document.createElement("button");
+    libraryButton.className = "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-min h-20 add-library";
+    libraryButton.dataset.title = title;
+    libraryButton.dataset.author = authors;
+    libraryButton.dataset.pagecount = pageCount;
+    libraryButton.textContent = "Library";
+
+    const readingListButton = document.createElement("button");
+    readingListButton.className = "bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-min h-20 add-reading-list";
+    readingListButton.dataset.title = title;
+    readingListButton.dataset.author = authors;
+    readingListButton.dataset.pagecount = pageCount;
+    readingListButton.textContent = "Reading List";
+
+    const wishlistButton = document.createElement("button");
+    wishlistButton.className = "bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 w-min h-20 add-wishlist";
+    wishlistButton.dataset.title = title;
+    wishlistButton.dataset.author = authors;
+    wishlistButton.dataset.pagecount = pageCount;
+    wishlistButton.textContent = "Wishlist";
+
+    const buttonContainer = document.createElement("div");
+    buttonContainer.className = "flex justify-end items-start";
+    buttonContainer.append(libraryButton, readingListButton, wishlistButton);
+
+    result.append(imageDetailsContainer, buttonContainer);
     searchResults.appendChild(result);
   });
   // Set up the event listeners for the new buttons
@@ -131,24 +174,46 @@ function displayResults(books) {
   });
 }
 
-
-
 function addBookToLibrary(title, author, pageCount) {
   const table = document.querySelector("table tbody");
   const row = document.createElement("tr");
+
+  // Add buttons for Reading List and Delete
+  const readingListButton = document.createElement("button");
+  readingListButton.className = "bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 ml-2";
+  readingListButton.textContent = "Reading List";
+
+  const deleteButton = document.createElement("button");
+  deleteButton.className = "bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 ml-2";
+  deleteButton.textContent = "Delete";
+
+  // Create button container
+  const buttonContainer = document.createElement("div");
+  buttonContainer.append(readingListButton, deleteButton);
+
+  // Create title span
+  const titleSpan = document.createElement("span");
+  titleSpan.textContent = title;
+
+  // Add title cell content
+  const titleCell = document.createElement("td");
+  titleCell.className = "border-solid border-2 border-gray-500 p-2 flex justify-between items-center";
+  titleCell.append(titleSpan, buttonContainer);
+
   row.innerHTML = `
-    <td class="border p-2">${title}</td>
+    ${titleCell.outerHTML}
     <td class="border p-2">${author}</td>
     <td class="text-center border p-2">0</td>
     <td class="text-center border p-2">${pageCount}</td>
     <td class="text-center border p-2"><input type="checkbox"></td>
   `;
+
+  // Append the row to the table
   table.appendChild(row);
 }
 
+
 function addBookToReadingList(title, author, pageCount) {
-  // Add the book to the library
-  addBookToLibrary(title, author, pageCount);
   
   // Add the book to the reading list (You can create a separate list and display it in your UI)
   console.log(`Book added to Reading List: ${title}`);
@@ -159,3 +224,7 @@ function addBookToWishlist(title, author, pageCount) {
   console.log(`Book added to Wishlist: ${title}`);
 }
 
+function deleteBookFromLibrary(row) {
+  row.remove();
+  console.log("row removed");
+}
