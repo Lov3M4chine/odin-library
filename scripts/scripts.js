@@ -13,26 +13,53 @@ const searchResults = document.createElement("div");
 searchResults.id = "search-results";
 searchResults.className = "mt-4";
 const API_KEY = "AIzaSyBSPf38Eaiajtj2gKFGxCuXCQjJPVC6_pQ";
-const tbody = document.querySelector("table tbody");
 const table = document.querySelector("table");
+const tbody = document.querySelector("tbody");
 const tableViewBtn = document.getElementById("table-view-btn");
 const cardViewBtn = document.getElementById("card-view-btn");
 const cardContainer = document.getElementById("card-container");
-let library = JSON.parse(localStorage.getItem("library")) || [];
+const library = JSON.parse(localStorage.getItem("library")) || [];
+console.log("Initial library:", library);
+const readingList = JSON.parse(localStorage.getItem("readingList")) || [];
+const libraryData = localStorage.getItem("library");
+const readingListLink = document.querySelector("#reading-list-link");
+
+
+document.addEventListener('DOMContentLoaded', () => {
+
+loadData();
+
+function loadData() {
+  console.log("Loading library:", library);
+  library.forEach((book) => {
+    console.log("Creating row and card for book:", book);
+    let row = createRow(book);
+    tbody.appendChild(row);
+
+    const card = createCard(book, row); // Pass the row element as an argument
+    const cardContainer = document.getElementById("card-container");
+    cardContainer.appendChild(card);
+  });
+}
+  
+  
+  // Call loadData at the beginning of your script
+
 
 manualBtn.addEventListener("click", () => {
-  const formContainer = document.createElement("div");
-  formContainer.classList.add("fixed", "z-50", "inset-0", "flex", "justify-center", "items-center");
+const formContainer = document.createElement("div");
+formContainer.classList.add("fixed", "z-50", "inset-0", "flex", "justify-center", "items-center");
 
-  const form = document.createElement("form");
-  form.classList.add("bg-white", "p-6", "rounded-md", "shadow-lg", "max-w-md", "w-full", "w-96", "relative");
+const form = document.createElement("form");
+form.classList.add("bg-white", "p-6", "rounded-md", "shadow-lg", "max-w-md", "w-full", "w-96", "relative");
   
   const titleInput = createFormInput("Title", "text", "Unknown", "title");
   const authorInput = createFormInput("Author", "text", "Unknown", "author");
   const genreInput = createFormInput("Genre", "text", "Unknown", "genre");
   const descriptionInput = createFormInput("Description", "textarea", "No description available", "description");
   const coverInput = createFormInput("Cover URL", "text", "https://via.placeholder.com/128x197?text=No%20Image", "coverURL");
-  const pageCountInput = createFormInput("Page Count", "number", "Unkown", "pageCount");
+  const isbnInput = createFormInput("ISBN #", "number", generateUniqueIdentifier(), "isbn");
+  const totalPagesInput = createFormInput("Page Count", "text", "Unknown", "totalPages");
   const pagesReadInput = createFormInput("Pages Read", "number", "0", "pagesRead");
   const isReadInput = createFormInput("Is Read?", "checkbox", false, "isRead");
 
@@ -56,7 +83,7 @@ manualBtn.addEventListener("click", () => {
     submitButton,
   );
 
-  form.append(closeButton, titleInput, authorInput, genreInput, descriptionInput, coverInput, pageCountInput, pagesReadInput, isReadInput, buttonContainer);
+  form.append(closeButton, titleInput, authorInput, genreInput, descriptionInput, coverInput, isbnInput, totalPagesInput, pagesReadInput, isReadInput, buttonContainer);
   formContainer.appendChild(form);
 
   overlay.classList.remove("hidden");
@@ -71,15 +98,21 @@ manualBtn.addEventListener("click", () => {
     const genre = formData.get("genre");
     const description = formData.get("description");
     const coverURL = formData.get("coverURL");
-    const pageCount = formData.get("pageCount");
+    const isbn = formData.get("isbn") || generateUniqueIdentifier();
+    const totalPages = formData.get("totalPages");
     const pagesRead = formData.get("pagesRead");
     const isRead = formData.get("isRead");
-    console.log(title, author, genre, pageCount, description, coverURL, pagesRead, isRead);
-    addBookToLibrary(title, author, genre, pageCount, description, coverURL, pagesRead, isRead);
+    const parsedtotalPages = isNaN(totalPages) ? "Unknown" : parseInt(totalPages);
+    addBookToLibrary(isbn, title, author, genre, parsedtotalPages, description, coverURL, pagesRead, isRead);
     formContainer.remove();
     overlay.classList.add("hidden");
   });
+  
 });
+
+function generateUniqueIdentifier() {
+  return Date.now();
+}
     
 
 function createFormInput(labelText, inputType, defaultValue, name) {
@@ -87,17 +120,10 @@ function createFormInput(labelText, inputType, defaultValue, name) {
   label.textContent = labelText;
   label.classList.add("block", "font-semibold", "mb-2");
 
-  let input;
-  if (inputType === "textarea") {
-    input = document.createElement("textarea");
-    input.classList.add("border", "border-gray-400", "p-3", "rounded", "w-full");
-  } else {
-    input = document.createElement("input");
-    input.type = inputType;
-    input.classList.add("border", "border-gray-400", "p-3", "rounded", "w-full", "h-10");
-  }
-
-  input.value = defaultValue || "";
+  const input = document.createElement("input");
+  input.type = inputType;
+  input.classList.add("border", "border-gray-400", "p-3", "rounded", "w-full", "h-10");
+  input.placeholder = defaultValue || "";
   input.required = false;
   input.name = name || "";
 
@@ -113,18 +139,23 @@ function createFormInput(labelText, inputType, defaultValue, name) {
     }
   });
 
+  if (inputType === "number") {
+    input.addEventListener("input", () => {
+      const value = parseInt(input.value);
+      if (isNaN(value)) {
+        input.setCustomValidity("Please enter a number");
+      } else {
+        input.setCustomValidity("");
+      }
+    });
+  }
+
   const container = document.createElement("div");
   container.appendChild(label);
   container.appendChild(input);
 
   return container;
 }
-
-
-
-
-
-
 
 
 
@@ -140,12 +171,7 @@ cardViewBtn.addEventListener("click", () => {
 });
 
 
-tbody.addEventListener("click", (event) => {
-  if (event.target.matches(".bg-red-600")) {
-    console.log("delete button clicked");
-    deleteBookFromLibrary(event.target.closest("tr"));
-  }
-});
+
 
 newBookBtn.addEventListener("click", () => {
   overlay.classList.remove("hidden");
@@ -178,11 +204,6 @@ searchInput.addEventListener("keyup", (e) => {
   }
 });
 
-
-
-
-
-
 function performSearch() {
   const query = searchInput.value;
   const criteria = searchCriteria.value.toLowerCase();
@@ -201,10 +222,20 @@ function displayResults(books) {
   books.forEach((book) => {
     const title = book.volumeInfo.title;
     const authors = book.volumeInfo.authors ? book.volumeInfo.authors.join(", ") : "Unknown";
-    const pageCount = book.volumeInfo.pageCount || "Unknown";
+    const totalPages = book.volumeInfo.totalPages || "Unknown";
     const genre = book.volumeInfo.categories ? book.volumeInfo.categories.join(", ") : "Unknown";
     const description = book.volumeInfo.description ? book.volumeInfo.description : "No description available";
     const bookImage = book.volumeInfo.imageLinks?.thumbnail || "https://via.placeholder.com/128x197?text=No%20Image";
+    let isbn = "Unknown";
+      if (book.volumeInfo.industryIdentifiers) {
+      for (const identifier of book.volumeInfo.industryIdentifiers) {
+        if (identifier.type === "ISBN_13" || identifier.type === "ISBN_10") {
+          isbn = identifier.identifier;
+          break;
+        }
+      }
+      }
+
 
     const result = document.createElement("div");
     result.className = "flex justify-between p-2 border-b border-gray-300 g-5";
@@ -220,15 +251,15 @@ function displayResults(books) {
     const authorsElement = document.createElement("p");
     authorsElement.textContent = authors;
 
-    const pageCountElement = document.createElement("p");
-    pageCountElement.textContent = `${pageCount} pages`;
+    const totalPagesElement = document.createElement("p");
+    totalPagesElement.textContent = `${totalPages} pages`;
 
     const genreElement = document.createElement("p");
     genreElement.textContent = `Genre: ${genre}`;
 
     const detailsContainer = document.createElement("div");
     detailsContainer.className = "flex flex-col";
-    detailsContainer.append(titleElement, authorsElement, pageCountElement, genreElement);
+    detailsContainer.append(titleElement, authorsElement, totalPagesElement, genreElement);
 
     const imageDetailsContainer = document.createElement("div");
     imageDetailsContainer.className = "flex items-start";
@@ -238,24 +269,33 @@ function displayResults(books) {
     libraryButton.className = "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-min h-20 add-library";
     libraryButton.dataset.title = title;
     libraryButton.dataset.author = authors;
-    libraryButton.dataset.pagecount = pageCount;
+    libraryButton.dataset.totalPages = totalPages;
     libraryButton.dataset.genre = genre;
     libraryButton.dataset.description = description;
     libraryButton.dataset.coverurl = bookImage;
+    libraryButton.dataset.isbn = isbn;
     libraryButton.textContent = "Library";
 
     const readingListButton = document.createElement("button");
     readingListButton.className = "bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-min h-20 add-reading-list";
-    readingListButton.dataset.title = title;
-    readingListButton.dataset.author = authors;
-    readingListButton.dataset.pagecount = pageCount;
+    libraryButton.dataset.title = title;
+    libraryButton.dataset.author = authors;
+    libraryButton.dataset.totalPages = totalPages;
+    libraryButton.dataset.genre = genre;
+    libraryButton.dataset.description = description;
+    libraryButton.dataset.coverurl = bookImage;
+    libraryButton.dataset.isbn = isbn;
     readingListButton.textContent = "Reading List";
 
     const wishlistButton = document.createElement("button");
     wishlistButton.className = "bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 w-min h-20 add-wishlist";
-    wishlistButton.dataset.title = title;
-    wishlistButton.dataset.author = authors;
-    wishlistButton.dataset.pagecount = pageCount;
+    libraryButton.dataset.title = title;
+    libraryButton.dataset.author = authors;
+    libraryButton.dataset.totalPages = totalPages;
+    libraryButton.dataset.genre = genre;
+    libraryButton.dataset.description = description;
+    libraryButton.dataset.coverurl = bookImage;
+    libraryButton.dataset.isbn = isbn;
     wishlistButton.textContent = "Wishlist";
 
     const buttonContainer = document.createElement("div");
@@ -276,10 +316,11 @@ function displayResults(books) {
       const title = e.target.dataset.title;
       const author = e.target.dataset.author;
       const genre = e.target.dataset.genre;
-      const pageCount = e.target.dataset.pagecount;
+      const totalPages = e.target.dataset.totalPages;
       const description = e.target.dataset.description;
       const coverURL = e.target.dataset.coverurl;
-      addBookToLibrary(title, author, genre, pageCount, description, coverURL);
+      const isbn = e.target.dataset.isbn;
+      addBookToLibrary(isbn, title, author, genre, totalPages, description, coverURL);
       overlay.classList.add("hidden");
       searchModal.classList.add("hidden");
     });
@@ -290,11 +331,12 @@ function displayResults(books) {
       const title = e.target.dataset.title;
       const author = e.target.dataset.author;
       const genre = e.target.dataset.genre;
-      const pageCount = e.target.dataset.pagecount;
+      const totalPages = e.target.dataset.totalPages;
       const description = e.target.dataset.description;
       const coverURL = e.target.dataset.coverurl;
-      addBookToReadingList(title, author, genre, pageCount, description, coverURL);
-      addBookToLibrary(title, author, genre, pageCount, description, coverURL);
+      const isbn = e.target.data.isbn;
+      addBookToReadingList(isbn, title, author, genre, totalPages, description, coverURL);
+      addBookToLibrary(isbn, title, author, genre, totalPages, description, coverURL);
       overlay.classList.add("hidden");
       searchModal.classList.add("hidden");
     });
@@ -304,24 +346,26 @@ function displayResults(books) {
     btn.addEventListener("click", (e) => {
       const title = e.target.dataset.title;
       const author = e.target.dataset.author;
-      const pageCount = e.target.dataset.pagecount;
       const genre = e.target.dataset.genre;
+      const totalPages = e.target.dataset.totalPages;
       const description = e.target.dataset.description;
       const coverURL = e.target.dataset.coverurl;
-      addBookToWishlist(title, author, genre, pageCount, description, coverURL);
+      const isbn = e.target.data.isbn;
+      addBookToWishlist(isbn, title, author, genre, totalPages, description, coverURL);
       overlay.classList.add("hidden");
       searchModal.classList.add("hidden");
     });
   });
 }
 
-function addBookToLibrary(title, author, genre, pageCount, description, coverURL, pagesRead, isRead) {
-  console.log(title, author, genre, pageCount, description, coverURL, pagesRead, isRead);
+function addBookToLibrary(isbn, title, author, genre, totalPages, description, coverURL, pagesRead, isRead) {
+  console.log(title, author, genre, totalPages, description, coverURL, pagesRead, isRead);
   
   const book = {
+    isbn: isbn,
     title: title,
     author: author,
-    totalPages: pageCount,
+    totalPages: totalPages,
     genre: genre,
     description: description,
     coverURL: coverURL,
@@ -338,26 +382,40 @@ function addBookToLibrary(title, author, genre, pageCount, description, coverURL
   const newRow = createRow(book);
   const newCard = createCard(book); // Create a card for the card view
 
-  // Add event listeners for add-to-reading-list and delete buttons on the card
-  newCard.querySelector(".bg-green-600").addEventListener("click", () => addToReadingList(book));
+  // // Add event listeners for add-to-reading-list and delete buttons on the card
+  // newCard.querySelector(".bg-green-600").addEventListener("click", () => {
+  //   addBookToReadingList(book);
+  //   const filteredLibrary = filterByReadingList();
+  //   renderTable(filteredLibrary, tbody);
+  // });
+
   newCard.querySelector(".bg-red-600").addEventListener("click", () => {
     // Remove book from the library
-    library = library.filter((b) => b !== book);
-
+    deleteBookFromLibrary(newRow);
+  
+    // // Remove book from the reading list
+    // readingList = readingList.filter((b) => b !== book);
+  
     // Update localStorage
-    localStorage.setItem("library", JSON.stringify(library));
-
-    // Update the UI
-    newRow.remove();
-    newCard.remove();
+    localStorage.setItem("readingList", JSON.stringify(readingList));
   });
+
+//   // Render the table initially
+// const filteredLibrary = filterByReadingList();
+// renderTable(filteredLibrary, tbody);
 
   // Add the generated card to the card container
   cardContainer.appendChild(newCard);
 
   // Add the new row to the table
-  const tbody = document.querySelector("table tbody");
   tbody.appendChild(newRow);
+
+  tbody.addEventListener("click", (event) => {
+    if (event.target.matches(".bg-red-600")) {
+      console.log("delete button clicked");
+      deleteBookFromLibrary(event.target.closest("tr"));
+    }
+  });
 
   // Add event listener to the checkbox to toggle the isRead property
   const checkbox = newRow.querySelector("input[type='checkbox']");
@@ -367,9 +425,9 @@ function addBookToLibrary(title, author, genre, pageCount, description, coverURL
   });
 }
 
-
 function createRow(book) {
   const row = document.createElement("tr");
+  console.log("Created row:", row);
   row.classList.add("text-white", "border-gray-600", "border-b");
 
   const titleCell = document.createElement("td");
@@ -391,15 +449,15 @@ function createRow(book) {
   pagesReadInput.value = book.pagesRead; // Set the value from the book object
   pagesReadInput.classList.add("bg-blue-900", "w-16", "text-white");
   pagesReadInput.addEventListener("input", () => {
-    if (parseInt(pagesReadInput.value) > parseInt(pageCountCell.textContent)) {
-      pagesReadInput.value = pageCountCell.textContent;
+    if (parseInt(pagesReadInput.value) > parseInt(totalPagesCell.textContent)) {
+      pagesReadInput.value = totalPagesCell.textContent;
     }
   });
   pagesRead.appendChild(pagesReadInput);
 
-  const pageCountCell = document.createElement("td");
-  pageCountCell.textContent = book.totalPages;
-  pageCountCell.classList.add("text-center", "px-2", "py-4", "border-gray-600", "border-r");
+  const totalPagesCell = document.createElement("td");
+  totalPagesCell.textContent = book.totalPages;
+  totalPagesCell.classList.add("text-center", "px-2", "py-4", "border-gray-600", "border-r");
 
   const readCell = document.createElement("td");
   const readCheckbox = document.createElement("input");
@@ -415,6 +473,7 @@ function createRow(book) {
     book.isRead = !book.isRead;
     localStorage.setItem("library", JSON.stringify(library));
   });
+  readCheckbox.checked = book.isRead;
   readCell.appendChild(readCheckbox);
 
   const btnContainer = document.createElement("div");
@@ -422,26 +481,34 @@ function createRow(book) {
   titleCell.appendChild(btnContainer);
 
   const addToReadingListBtn = document.createElement("button");
-  addToReadingListBtn.className = "bg-green-600 text-white px-2 py-1 rounded";
-  addToReadingListBtn.textContent = "Reading List";
-  btnContainer.appendChild(addToReadingListBtn);
+  if (!readingList.some((readingBook) => readingBook.title === book.title && readingBook.author === book.author)) {
+    addToReadingListBtn.className = "bg-green-600 text-white px-2 py-1 rounded";
+    addToReadingListBtn.textContent = "Reading List";
+    btnContainer.appendChild(addToReadingListBtn);
+  }
 
   const deleteButton = document.createElement("button");
   deleteButton.className = "bg-red-600 text-white px-2 py-1 rounded";
   deleteButton.textContent = "Delete";
   btnContainer.appendChild(deleteButton);
 
+  deleteButton.addEventListener("click", () => {
+    deleteBookFromLibrary(row);
+  });
+  
+
   row.appendChild(titleCell);
   row.appendChild(authorCell);
   row.appendChild(genreCell);
   row.appendChild(pagesRead);
-  row.appendChild(pageCountCell);
+  row.appendChild(totalPagesCell);
   row.appendChild(readCell);
 
   // Increment a counter variable to determine the row number
   createRow.rowCounter = createRow.rowCounter ? createRow.rowCounter + 1 : 1;
 
   // Use the counter to set the background color for even/odd rows
+  console.log("Row before setting the background color:", row);
   if (createRow.rowCounter % 2 === 0) {
     row.classList.add("bg-blue-800");
   } else {
@@ -451,12 +518,14 @@ function createRow(book) {
   return row;
 }
 
-function createCard(book) {
+function createCard(book, row) {
   const MAX_DESCRIPTION_LENGTH = 100; // Set the maximum length for the description
   
   const card = document.createElement("div");
   card.classList.add("flex", "flex-col", "items-center", "justify-stretch", "bg-white", "rounded", "shadow-lg", "p-4", "m-4", "w-64");
   
+  
+
   // Limit the description to a maximum length
   const description = book.description ? book.description.slice(0, MAX_DESCRIPTION_LENGTH) + "..." : "No description available";
   
@@ -474,28 +543,79 @@ function createCard(book) {
       </div>
       <div class="button-container flex justify-between mt-4">
         <button class="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">Add to Reading List</button>
-        <button class="bg-red-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">Delete</button>
+        <button id="delete-card-button" class="bg-red-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">Delete</button>
       </div>
     </div>
 `;
+
+const deleteCardButton = card.querySelector("#delete-card-button");
+deleteCardButton.addEventListener("click", () => {
+  deleteBookFromLibrary(row); // Make sure to pass the corresponding row element from the table
+});
 
 return card;
 
 }
 
-function addBookToReadingList(title, author, pageCount) {
-  
-  // Add the book to the reading list (You can create a separate list and display it in your UI)
-  console.log(`Book added to Reading List: ${title}`);
+function addBookToReadingList(isbn, title, author, genre, totalPages, description, coverURL, pagesRead, isRead) {
+  const book = {
+    isbn: isbn,
+    title: title,
+    author: author,
+    genre: genre,
+    totalPages: totalPages,
+    description: description,
+    coverURL: coverURL,
+    pagesRead: pagesRead,
+    isRead: isRead
+  };
+  readingList.push(book);
 }
 
-function addBookToWishlist(title, author, pageCount) {
+function addBookToWishlist(title, author, totalPages) {
   // Add the book to the wishlist (You can create a separate list and display it in your UI)
   console.log(`Book added to Wishlist: ${title}`);
 }
 
 function deleteBookFromLibrary(row) {
+  const bookTitle = row.querySelector("td").textContent;
+  
+  // Find the index of the book to be removed
+  const bookIndex = library.findIndex((book) => book.title === bookTitle);
+
+  // Remove the book from the library array using splice method
+  library.splice(bookIndex, 1);
+
+  // Update localStorage
+  localStorage.setItem("library", JSON.stringify(library));
+
+  // Remove the row from the table
   row.remove();
+  location.reload();
   console.log("row removed");
 }
 
+// function filterByReadingList() {
+//   const filteredLibrary = library.filter((book) => {
+//     return readingList.some((readingBook) => {
+//       return readingBook.title === book.title && readingBook.author === book.author;
+//     });
+//   });
+//   return filteredLibrary;
+// }
+
+// function renderTable(libraryData, tbody) {
+//   tbody.innerHTML = "";
+
+//   for (const book of libraryData) {
+//     const newRow = createRow(book);
+//     tbody.appendChild(newRow);
+//   }
+// }
+
+// // Render the initial state of the table and card view
+// const filteredLibrary = filterByReadingList();
+// renderTable(filteredLibrary, tbody);
+// library.forEach(book => cardContainer.appendChild(createCard(book)));
+
+});
