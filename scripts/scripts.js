@@ -508,19 +508,19 @@ function displayResults(books) {
 
     const libraryButton = document.createElement("button");
     libraryButton.className =
-      "bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 w-min h-20 add-library";
+      "bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 w-min h-20 transition-transform duration-200 ease-in-out hover:scale-110 hover:shadow-lg add-library";
     libraryButton.dataset.book = JSON.stringify(book);
     libraryButton.textContent = "Library";
 
     const readingListButton = document.createElement("button");
     readingListButton.className =
-      "bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-min h-20 add-reading-list";
+      "bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-min h-20 transition-transform duration-200 ease-in-out hover:scale-110 hover:shadow-lg add-reading-list";
     readingListButton.dataset.book = JSON.stringify(book);
     readingListButton.textContent = "Reading List";
 
     const wishlistButton = document.createElement("button");
     wishlistButton.className =
-      "bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 w-min h-20 add-wishlist";
+      "bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700 w-min h-20 transition-transform duration-200 ease-in-out hover:scale-110 hover:shadow-lg add-wishlist";
     wishlistButton.dataset.book = JSON.stringify(book);
     wishlistButton.textContent = "Wishlist";
 
@@ -585,7 +585,7 @@ function createButtonContainer(row) {
 function createReadingListBtn(book, row, btnContainer, activeLink) {
   if (activeLink === "libraryActive") {
     const addToReadingListBtn = document.createElement("button");
-    addToReadingListBtn.className = "bg-green-600 text-white px-2 py-1 rounded";
+    addToReadingListBtn.className = "bg-green-600 text-white px-2 py-1 rounded transition-transform duration-200 ease-in-out hover:scale-110 hover:shadow-lg";
     addToReadingListBtn.textContent = "Reading List";
     btnContainer.appendChild(addToReadingListBtn);
     addToReadingListBtn.addEventListener("click", () => {
@@ -599,7 +599,7 @@ function createReadingListBtn(book, row, btnContainer, activeLink) {
 function createAddToLibrarybtn(book, row, btnContainer, activeLink) {
   if (activeLink === "wishListActive") {
     const addToLibraryBtn = document.createElement("button");
-    addToLibraryBtn.className = "bg-green-600 text-white px-2 py-1 rounded";
+    addToLibraryBtn.className = "bg-green-600 text-white px-2 py-1 rounded transition-transform duration-200 ease-in-out hover:scale-110 hover:shadow-lg";
     addToLibraryBtn.textContent = "Add to Library";
     btnContainer.appendChild(addToLibraryBtn);
     addToLibraryBtn.addEventListener("click", () => {
@@ -613,7 +613,7 @@ function createAddToLibrarybtn(book, row, btnContainer, activeLink) {
 
 function createEditBtn(book, row, btnContainer, activeLink) {
   const editButton = document.createElement("button");
-  editButton.className = "bg-yellow-600 text-white px-2 py-1 rounded";
+  editButton.className = "bg-yellow-600 text-white px-2 py-1 rounded transition-transform duration-200 ease-in-out hover:scale-110 hover:shadow-lg";
   editButton.textContent = "Edit";
   btnContainer.appendChild(editButton);
   editButton.addEventListener("click", () => {
@@ -623,7 +623,7 @@ function createEditBtn(book, row, btnContainer, activeLink) {
 
 function createDeleteBtn(book, row, btnContainer, activeLink) {
   const deleteButton = document.createElement("button");
-  deleteButton.className = "bg-red-600 text-white px-2 py-1 rounded";
+  deleteButton.className = "bg-red-600 text-white px-2 py-1 rounded transition-transform duration-200 ease-in-out hover:scale-110 hover:shadow-lg";
   deleteButton.textContent = "Delete";
   btnContainer.appendChild(deleteButton);
   deleteButton.addEventListener("click", () => {
@@ -832,7 +832,12 @@ function createCardBtns() {
       "focus:outline-none",
       "focus:ring-2",
       "focus:ring-green-500",
-      "focus:ring-offset-2"
+      "focus:ring-offset-2",
+      "transition-transform",
+      "duration-200",
+      "ease-in-out",
+      "hover:scale-110",
+      "hover:shadow-lg"
     );
     addToReadingListBtn.innerText = "Add to Reading List";
     buttonWrapper.appendChild(addToReadingListBtn);
@@ -850,7 +855,12 @@ function createCardBtns() {
       "focus:outline-none",
       "focus:ring-2",
       "focus:ring-red-500",
-      "focus:ring-offset-2"
+      "focus:ring-offset-2",
+      "transition-transform",
+      "duration-200",
+      "ease-in-out",
+      "hover:scale-110",
+      "hover:shadow-lg"
     );
     deleteBtn.innerText = "Delete";
     buttonWrapper.appendChild(deleteBtn);
@@ -869,7 +879,12 @@ function createCardBtns() {
       "focus:outline-none",
       "focus:ring-2",
       "focus:ring-red-500",
-      "focus:ring-offset-2"
+      "focus:ring-offset-2",
+      "transition-transform",
+      "duration-200",
+      "ease-in-out",
+      "hover:scale-110",
+      "hover:shadow-lg"
     );
     deleteBtn.innerText = "Delete";
     buttonWrapper.appendChild(deleteBtn);
@@ -888,7 +903,12 @@ function createCardBtns() {
       "focus:outline-none",
       "focus:ring-2",
       "focus:ring-green-500",
-      "focus:ring-offset-2"
+      "focus:ring-offset-2",
+      "transition-transform",
+      "duration-200",
+      "ease-in-out",
+      "hover:scale-110",
+      "hover:shadow-lg"
     );
     addToLibraryBtn.innerText = "Add to Library";
     buttonWrapper.appendChild(addToLibraryBtn);
@@ -906,7 +926,12 @@ function createCardBtns() {
       "focus:outline-none",
       "focus:ring-2",
       "focus:ring-red-500",
-      "focus:ring-offset-2"
+      "focus:ring-offset-2",
+      "transition-transform",
+      "duration-200",
+      "ease-in-out",
+      "hover:scale-110",
+      "hover:shadow-lg"
     );
     deleteBtn.innerText = "Delete";
     buttonWrapper.appendChild(deleteBtn);

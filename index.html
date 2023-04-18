@@ -17,11 +17,11 @@
 
         <!--Header-->
         <div class="bg-slate-800 w-full flex justify-between items-center gap-8 p-3">
-            <p class="text-cyan-300 text-3xl whitespace-nowrap flex items-center">My Library</p>
+            <p class="text-teal-300 text-3xl whitespace-nowrap flex items-center">My Library</p>
                 <div class="flex items-center gap-5">
                     <!--Search Bar-->
-                    <div class="relative">
-                        <input type="text" placeholder="Search" id="library-search-filter" class="text-cyan-100 text-l bg-cyan-800 rounded p-1 h-fit pl-8 pr-4 w-full search-input">
+                    <div class="relative transition-transform duration-200 ease-in-out hover:scale-110 hover:shadow-lg">
+                        <input type="text" placeholder="Search" id="library-search-filter" class="text-teal-100 text-l bg-teal-800 rounded p-1 h-fit pl-8 pr-4 w-full search-input ">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3">
                         <svg class="h-4 w-4 fill-current text-gray-500" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                             <path d="M6.5 12a5.5 5.5 0 1 1 3.889-1.611l4.428 4.427a1 1 0 1 1-1.414 1.414l-4.428-4.427A5.453 5.453 0 0 1 6.5 12zm0-9a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z" />
@@ -29,12 +29,12 @@
                         </span>
                     </div>
                     <!--New Book-->
-                    <button id="new-book-btn" class="text-cyan-100 text-l bg-cyan-800 rounded p-1">New<br>Book</button>
+                    <button id="new-book-btn" class="text-teal-100 text-l bg-teal-800 rounded p-2 transition-transform duration-200 ease-in-out hover:scale-110 hover:shadow-lg">New<br>Book</button>
                 </div>
             <!--Table view and Card View Buttons-->
             <div class="flex justify-end mb-4">
-                <button id="table-view-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-gray-400 mr-2">Table View</button>
-                <button id="card-view-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-gray-400">Card View</button>
+                <button id="table-view-btn" class="bg-teal-800 text-teal-200 px-4 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-gray-400 mr-2 transition-transform duration-200 ease-in-out hover:scale-110 hover:shadow-lg">Table View</button>
+                <button id="card-view-btn" class="bg-teal-800 text-teal-200 px-4 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-gray-400 transition-transform duration-200 ease-in-out hover:scale-110 hover:shadow-lg">Card View</button>
             </div>
         </div>
 
@@ -43,9 +43,9 @@
             <!--Sidebar-->
             <div class="bg-slate-800 text-cyan-300 w-fit h-screen flex flex-col items-center flex-nowrap whitespace-nowrap pt-6">
                 <div class="bg-cyan-800 flex flex-col">
-                    <button class="mx-3 my-2 px-2 py-1 pt-3 text-xl focus:outline-none" id="reading-list-link">Reading List</button>
-                    <button class="mx-3 my-2 px-2 py-1 text-xl focus:outline-none" id="library-link">Library</button>
-                    <button class="mx-3 my-2 px-2 py-1 text-xl focus:outline-none" id="wish-list-link">Wishlist</button>
+                    <button class="mx-3 my-2 px-2 py-1 pt-3 text-xl transition-transform duration-200 ease-in-out hover:scale-110 hover:shadow-lg focus:outline-none rounded" id="reading-list-link">Reading List</button>
+                    <button class="mx-3 my-2 px-2 py-1 text-xl focus:outline-none transition-transform duration-200 ease-in-out hover:scale-110 hover:shadow-lg rounded" id="library-link">Library</button>
+                    <button class="mx-3 my-2 px-2 py-1 text-xl focus:outline-none transition-transform duration-200 ease-in-out hover:scale-110 hover:shadow-lg rounded" id="wish-list-link">Wishlist</button>
                 </div>
             </div>
             <!--Content-->
