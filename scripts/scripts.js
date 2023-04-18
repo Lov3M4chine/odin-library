@@ -43,6 +43,14 @@ document.addEventListener("DOMContentLoaded", () => {
     loadData();
     console.log("Initial library:", library)
   });
+
+  wishListLink.addEventListener("click", () => {
+    activeLink = "wishListActive";
+    loadData();
+    console.log("Initial wishList:", wishList)
+  });
+
+  
   
   function loadData() {
     let data;
@@ -652,7 +660,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function addBookToReadingList(book) {
     const { isbn } = book;
     if (readingList.some(item => item.isbn === isbn)) {
-      console.log("Book is already in the reading list");
+      console.log(`${book.title} is already in the reading list`);
       return;
     }
     readingList.push(book);
@@ -662,7 +670,13 @@ document.addEventListener("DOMContentLoaded", () => {
   
 
   function addBookToWishlist(book) {
-    console.log(`Book added to Wishlist: ${title}`);
+    const { isbn } = book;
+    if (wishList.some(item => item.isbn === isbn)) {
+      console.log(`${book.title} is already in the wish list`);
+      return;
+    }
+    wishList.push(book);
+    localStorage.setItem("wishList", JSON.stringify(wishList));
   }
 
   function deleteBook(isbn) {
