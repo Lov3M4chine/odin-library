@@ -51,7 +51,7 @@ function addBookToLibrary(book) {
   } else if (activeLink === "wishListActive") {
     library.push(book);
     localStorage.setItem("library", JSON.stringify(library));
-    deleteBook(book);
+    deleteBook(book.isbn);
     loadData();
   } else {
     library.push(book);
@@ -603,7 +603,7 @@ function createAddToLibrarybtn(book, row, btnContainer, activeLink) {
     addToLibraryBtn.textContent = "Add to Library";
     btnContainer.appendChild(addToLibraryBtn);
     addToLibraryBtn.addEventListener("click", () => {
-      deleteBook(book);
+      deleteBook(book.isbn);
       addBookToLibrary(book);
     });
   } else {
@@ -925,7 +925,8 @@ function initializeCardReadingListBtn(book, card) {
 function initializeCardAddToLibraryBtn(book, card) {
   const addToLibraryBtn = card.querySelector(".add-to-library-button");
   addToLibraryBtn.addEventListener("click", () => {
-    addToLibrary(book);
+    deleteBook(book.isbn);
+    addBookToLibrary(book);
   });
 }
 
