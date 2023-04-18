@@ -33,13 +33,11 @@ document.addEventListener("DOMContentLoaded", () => {
       let row = createRow(book);
       tbody.appendChild(row);
 
-      const card = createCard(book, row); // Pass the row element as an argument
+      const card = createCard(book, row);
       const cardContainer = document.getElementById("card-container");
       cardContainer.appendChild(card);
     });
   }
-
-  // Call loadData at the beginning of your script
 
   manualBtn.addEventListener("click", () => {
     const formContainer = document.createElement("div");
@@ -271,10 +269,6 @@ document.addEventListener("DOMContentLoaded", () => {
     searchModal.classList.add("hidden");
   });
 
-  manualBtn.addEventListener("click", () => {
-    // Handle manual button click event
-  });
-
   searchInput.addEventListener("keyup", (e) => {
     if (e.key === "Enter") {
       performSearch();
@@ -399,7 +393,6 @@ document.addEventListener("DOMContentLoaded", () => {
       searchResults.appendChild(result);
     });
 
-    // Set up the event listeners for the new buttons
     const libraryButtons = searchResults.querySelectorAll(".add-library");
     const readingListButtons =
       searchResults.querySelectorAll(".add-reading-list");
@@ -507,41 +500,21 @@ document.addEventListener("DOMContentLoaded", () => {
       isRead: isRead,
     };
 
-    // Add the book to the library
     library.push(book);
 
-    // Update localStorage
     localStorage.setItem("library", JSON.stringify(library));
 
     const newRow = createRow(book);
     const newCard = createCard(book); // Create a card for the card view
 
-    // // Add event listeners for add-to-reading-list and delete buttons on the card
-    // newCard.querySelector(".bg-green-600").addEventListener("click", () => {
-    //   addBookToReadingList(book);
-    //   const filteredLibrary = filterByReadingList();
-    //   renderTable(filteredLibrary, tbody);
-    // });
 
     newCard.querySelector(".bg-red-600").addEventListener("click", () => {
-      // Remove book from the library
       deleteBookFromLibrary(newRow);
-
-      // // Remove book from the reading list
-      // readingList = readingList.filter((b) => b !== book);
-
-      // Update localStorage
       localStorage.setItem("readingList", JSON.stringify(readingList));
     });
 
-    //   // Render the table initially
-    // const filteredLibrary = filterByReadingList();
-    // renderTable(filteredLibrary, tbody);
-
-    // Add the generated card to the card container
     cardContainer.appendChild(newCard);
 
-    // Add the new row to the table
     tbody.appendChild(newRow);
 
     tbody.addEventListener("click", (event) => {
@@ -550,7 +523,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // Add event listener to the checkbox to toggle the isRead property
     const checkbox = newRow.querySelector("input[type='checkbox']");
     checkbox.addEventListener("change", (event) => {
       book.isRead = event.target.checked;
@@ -586,7 +558,7 @@ document.addEventListener("DOMContentLoaded", () => {
     pagesRead.classList.add("text-center");
     const pagesReadInput = document.createElement("input");
     pagesReadInput.type = "number";
-    pagesReadInput.value = book.pagesRead; // Set the value from the book object
+    pagesReadInput.value = book.pagesRead; 
     pagesReadInput.classList.add("bg-blue-900", "w-16", "text-white");
     pagesReadInput.addEventListener("input", () => {
       if (
@@ -663,10 +635,8 @@ document.addEventListener("DOMContentLoaded", () => {
     row.appendChild(totalPagesCell);
     row.appendChild(readCell);
 
-    // Increment a counter variable to determine the row number
     createRow.rowCounter = createRow.rowCounter ? createRow.rowCounter + 1 : 1;
 
-    // Use the counter to set the background color for even/odd rows
     if (createRow.rowCounter % 2 === 0) {
       row.classList.add("bg-blue-800");
     } else {
@@ -677,7 +647,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function createCard(book, row) {
-    const MAX_DESCRIPTION_LENGTH = 100; // Set the maximum length for the description
+    const MAX_DESCRIPTION_LENGTH = 100;
 
     const card = document.createElement("div");
     card.classList.add(
@@ -693,7 +663,6 @@ document.addEventListener("DOMContentLoaded", () => {
       "w-64"
     );
 
-    // Limit the description to a maximum length
     const description = book.description
       ? book.description.slice(0, MAX_DESCRIPTION_LENGTH) + "..."
       : "No description available";
@@ -719,7 +688,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const deleteCardButton = card.querySelector("#delete-card-button");
     deleteCardButton.addEventListener("click", () => {
-      deleteBookFromLibrary(row); // Make sure to pass the corresponding row element from the table
+      deleteBookFromLibrary(row); 
     });
 
     return card;
@@ -751,26 +720,21 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function addBookToWishlist(title, author, totalPages) {
-    // Add the book to the wishlist (You can create a separate list and display it in your UI)
     console.log(`Book added to Wishlist: ${title}`);
   }
 
   function deleteBookFromLibrary(row) {
     const isbn = row.dataset.isbn;
 
-    // Find the index of the book to be removed
     const bookIndex = library.findIndex(
       (book) => book.isbn.toString() === isbn.toString()
     );
 
     if (bookIndex !== -1) {
-      // Remove the book from the library array using splice method
       library.splice(bookIndex, 1);
 
-      // Update localStorage
       localStorage.setItem("library", JSON.stringify(library));
 
-      // Remove the row from the table
       row.remove();
       console.log("row removed");
       return;
@@ -779,26 +743,3 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 });
-
-// function filterByReadingList() {
-//   const filteredLibrary = library.filter((book) => {
-//     return readingList.some((readingBook) => {
-//       return readingBook.title === book.title && readingBook.author === book.author;
-//     });
-//   });
-//   return filteredLibrary;
-// }
-
-// function renderTable(libraryData, tbody) {
-//   tbody.innerHTML = "";
-
-//   for (const book of libraryData) {
-//     const newRow = createRow(book);
-//     tbody.appendChild(newRow);
-//   }
-// }
-
-// // Render the initial state of the table and card view
-// const filteredLibrary = filterByReadingList();
-// renderTable(filteredLibrary, tbody);
-// library.forEach(book => cardContainer.appendChild(createCard(book)));
