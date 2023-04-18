@@ -2,7 +2,3 @@
 @tailwind components;
 @tailwind utilities;
 
-tbody tr:nth-child(2n) {
-    background-color: rgb(30 64 175);
-  }
-

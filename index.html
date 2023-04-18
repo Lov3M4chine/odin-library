@@ -7,7 +7,7 @@
     <title>My Library</title>
     <link rel="stylesheet" href="/styles/styles.css">
 </head>
-<body class="bg-slate-800">
+<body class="bg-cyan-800">
 
     <!--Main Container-->
     <div class="flex flex-col">
@@ -16,41 +16,44 @@
         <div id="overlay" class="hidden absolute min-h-full inset-0 backdrop-blur-sm backdrop-brightness-50 z-20"></div>
 
         <!--Header-->
-        <div class="bg-blue-800 w-full flex justify-center items-center gap-8 p-3">
-            <p class="text-blue-300 text-3xl whitespace-nowrap flex items-center">My Library</p>
-            <!--New Book-->
-            <button id="new-book-btn" class="text-blue-100 text-l bg-slate-800 rounded p-1">New<br>Book</button>
-
-
-            <!--Search Bar-->
-            <div class="relative">
-                <input type="text" placeholder="Search" id="library-search-filter" class="text-blue-100 text-l bg-slate-800 rounded p-1 h-fit pl-8 pr-4 search-input">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                  <svg class="h-4 w-4 fill-current text-gray-500" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M6.5 12a5.5 5.5 0 1 1 3.889-1.611l4.428 4.427a1 1 0 1 1-1.414 1.414l-4.428-4.427A5.453 5.453 0 0 1 6.5 12zm0-9a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z" />
-                  </svg>
-                </span>
-              </div>
+        <div class="bg-slate-800 w-full flex justify-between items-center gap-8 p-3">
+            <p class="text-cyan-300 text-3xl whitespace-nowrap flex items-center">My Library</p>
+                <div class="flex items-center gap-5">
+                    <!--Search Bar-->
+                    <div class="relative">
+                        <input type="text" placeholder="Search" id="library-search-filter" class="text-cyan-100 text-l bg-cyan-800 rounded p-1 h-fit pl-8 pr-4 w-full search-input">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3">
+                        <svg class="h-4 w-4 fill-current text-gray-500" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6.5 12a5.5 5.5 0 1 1 3.889-1.611l4.428 4.427a1 1 0 1 1-1.414 1.414l-4.428-4.427A5.453 5.453 0 0 1 6.5 12zm0-9a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7z" />
+                        </svg>
+                        </span>
+                    </div>
+                    <!--New Book-->
+                    <button id="new-book-btn" class="text-cyan-100 text-l bg-cyan-800 rounded p-1">New<br>Book</button>
+                </div>
+            <!--Table view and Card View Buttons-->
+            <div class="flex justify-end mb-4">
+                <button id="table-view-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-gray-400 mr-2">Table View</button>
+                <button id="card-view-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-gray-400">Card View</button>
+            </div>
         </div>
 
         <!--Library-->
-        <div class="flex">
+        <div class="bg-slate-800 flex">
             <!--Sidebar-->
-            <div class="bg-blue-700 text-blue-300 w-fit h-screen flex flex-col items-center flex-nowrap whitespace-nowrap">
-                <button class="mx-3 my-2 px-2 py-1 pt-3 text-xl focus:outline-none" id="reading-list-link">Reading List</button>
-                <button class="mx-3 my-2 px-2 py-1 text-xl focus:outline-none" id="library-link">Library</button>
-                <button class="mx-3 my-2 px-2 py-1 text-xl focus:outline-none" id="wish-list-link">Wishlist</button>
+            <div class="bg-slate-800 text-cyan-300 w-fit h-screen flex flex-col items-center flex-nowrap whitespace-nowrap pt-6">
+                <div class="bg-cyan-800 flex flex-col">
+                    <button class="mx-3 my-2 px-2 py-1 pt-3 text-xl focus:outline-none" id="reading-list-link">Reading List</button>
+                    <button class="mx-3 my-2 px-2 py-1 text-xl focus:outline-none" id="library-link">Library</button>
+                    <button class="mx-3 my-2 px-2 py-1 text-xl focus:outline-none" id="wish-list-link">Wishlist</button>
+                </div>
             </div>
             <!--Content-->
             <div class="flex w-full relative">
                 <!--Library Table-->
-                <div class="bg-blue-900 m-6 w-full" id="library-table">
-                    <div class="flex justify-end mb-4">
-                        <button id="table-view-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-gray-400 mr-2">Table View</button>
-                        <button id="card-view-btn" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-gray-400">Card View</button>
-                    </div>
-                    <table class="text-blue-300 w-full">
-                        <thead class="font-bold">
+                <div class="bg-slate-800 p-6 w-full" id="library-table">
+                    <table class="text-cyan-300 w-full">
+                        <thead class="bg-cyan-800 font-bold">
                         <tr>
                             <th class="border p-2">Title</th>
                             <th class="border p-2">Author</th>
@@ -107,7 +110,7 @@
                                 <!--Search Bar-->
                                 <div class="mt-2 flex">
                                   <label for="search-criteria" class="sr-only">Search by</label>
-                                  <select id="search-criteria" name="search-criteria" class="focus:ring-blue-500 focus:border-blue-500 block w-full sm:w-auto pl-3 pr-10 py-2 border-gray-300 rounded-md mr-2">
+                                  <select id="search-criteria" name="search-criteria" class="focus:ring-cyan-500 focus:border-cyan-500 block w-full sm:w-auto pl-3 pr-10 py-2 border-gray-300 rounded-md mr-2">
                                     <option>Title</option>
                                     <option>Author</option>
                                     <option>ISBN</option>
@@ -133,7 +136,7 @@
          </div>
 
         <!--Footer-->
-        <div class="bg-slate-900">
+        <div class="bg-cyan-900">
 
         </div>
     </div>

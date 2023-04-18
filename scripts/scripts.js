@@ -168,11 +168,11 @@ function createSubmitButton(book) {
   submitButton.classList.add(
     "px-4",
     "py-2",
-    "bg-blue-500",
+    "bg-cyan-500",
     "text-white",
     "font-medium",
     "rounded-md",
-    "hover:bg-blue-600",
+    "hover:bg-cyan-600",
     "transition-colors"
   );
   submitButton.textContent = book ? "Update Book" : "Add Book";
@@ -508,7 +508,7 @@ function displayResults(books) {
 
     const libraryButton = document.createElement("button");
     libraryButton.className =
-      "bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-min h-20 add-library";
+      "bg-cyan-600 text-white px-4 py-2 rounded hover:bg-cyan-700 w-min h-20 add-library";
     libraryButton.dataset.book = JSON.stringify(book);
     libraryButton.textContent = "Library";
 
@@ -665,7 +665,7 @@ function createPagesReadCell(book, row) {
   const pagesReadInput = document.createElement("input");
   pagesReadInput.type = "number";
   pagesReadInput.value = book.pagesRead;
-  pagesReadInput.classList.add("bg-blue-900", "w-16", "text-white");
+  pagesReadInput.classList.add("bg-cyan-900", "w-16", "text-white");
   pagesReadInput.addEventListener("input", () => {
     if (parseInt(pagesReadInput.value) > parseInt(totalPagesCell.textContent)) {
       pagesReadInput.value = totalPagesCell.textContent;
@@ -720,9 +720,9 @@ function initializeRowCounter(row) {
   createRow.rowCounter = createRow.rowCounter ? createRow.rowCounter + 1 : 1;
 
   if (createRow.rowCounter % 2 === 0) {
-    row.classList.add("bg-blue-800");
+    row.classList.add("bg-cyan-800");
   } else {
-    row.classList.add("bg-blue-700");
+    row.classList.add("bg-cyan-700");
   }
 }
 
@@ -958,7 +958,37 @@ function createCard(book) {
   return card;
 }
 
-// Load the data from the libraries and display in table or cards
+// *****User search filter functions*****
+function getBookList(activeLink) {
+  if (activeLink === "libraryActive") {
+    return library;
+  } else if (activeLink === "readingListActive") {
+    return readingList;
+  } else if (activeLink === "wishListActive") {
+    return wishList;
+  }
+}
+
+function loadUserSearchData() {
+  const cardContainer = document.getElementById("card-container");
+
+  if (cardContainer) {
+    cardContainer.innerHTML = "";
+  }
+  if (tbody) {
+    tbody.innerHTML = "";
+  }
+
+  userSearchResults.forEach((book) => {
+    const card = createCard(book);
+    cardContainer.appendChild(card);
+
+    const newRow = createLibraryRow(book, activeLink);
+    tbody.appendChild(newRow);
+  });
+}
+
+// *****Load the data from the libraries and display in table or cards
 function loadData() {
   let data;
   const cardContainer = document.getElementById("card-container");
@@ -989,16 +1019,6 @@ function loadData() {
 
 // *****Event Listeners*****
 
-function getBookList(activeLink) {
-  if (activeLink === "libraryActive") {
-    return library;
-  } else if (activeLink === "readingListActive") {
-    return readingList;
-  } else if (activeLink === "wishListActive") {
-    return wishList;
-  }
-}
-
 librarySearchFilter.addEventListener('input', () => {
   const searchText = librarySearchFilter.value.trim().toLowerCase();
   const bookList = getBookList(activeLink);
@@ -1014,25 +1034,6 @@ librarySearchFilter.addEventListener('input', () => {
   });
   loadUserSearchData();
 });
-
-function loadUserSearchData() {
-  const cardContainer = document.getElementById("card-container");
-
-  if (cardContainer) {
-    cardContainer.innerHTML = "";
-  }
-  if (tbody) {
-    tbody.innerHTML = "";
-  }
-
-  userSearchResults.forEach((book) => {
-    const card = createCard(book);
-    cardContainer.appendChild(card);
-
-    const newRow = createLibraryRow(book, activeLink);
-    tbody.appendChild(newRow);
-  });
-}
 
 manualBtn.addEventListener("click", () => {
   displayForm();
