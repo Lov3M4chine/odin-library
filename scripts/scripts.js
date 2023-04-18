@@ -32,7 +32,6 @@ loadData();
 function loadData() {
   console.log("Loading library:", library);
   library.forEach((book) => {
-    console.log("Creating row and card for book:", book);
     let row = createRow(book);
     tbody.appendChild(row);
 
@@ -360,7 +359,6 @@ function displayResults(books) {
 }
 
 function addBookToLibrary(isbn, title, author, genre, totalPages, description, coverURL, pagesRead, isRead) {
-  console.log(title, author, genre, totalPages, description, coverURL, pagesRead, isRead);
   
   const book = {
     isbn: isbn,
@@ -413,7 +411,6 @@ function addBookToLibrary(isbn, title, author, genre, totalPages, description, c
 
   tbody.addEventListener("click", (event) => {
     if (event.target.matches(".bg-red-600")) {
-      console.log("delete button clicked");
       deleteBookFromLibrary(event.target.closest("tr"));
     }
   });
@@ -428,7 +425,7 @@ function addBookToLibrary(isbn, title, author, genre, totalPages, description, c
 
 function createRow(book) {
   const row = document.createElement("tr");
-  console.log("Created row:", row);
+  row.dataset.isbn = book.isbn;
   row.classList.add("text-white", "border-gray-600", "border-b");
 
   const titleCell = document.createElement("td");
@@ -509,7 +506,6 @@ function createRow(book) {
   createRow.rowCounter = createRow.rowCounter ? createRow.rowCounter + 1 : 1;
 
   // Use the counter to set the background color for even/odd rows
-  console.log("Row before setting the background color:", row);
   if (createRow.rowCounter % 2 === 0) {
     row.classList.add("bg-blue-800");
   } else {
@@ -581,16 +577,27 @@ function addBookToWishlist(title, author, totalPages) {
 function deleteBookFromLibrary(row) {
   const isbn = row.dataset.isbn;
 
-  // Remove the book from the library array
-  library = library.filter((book) => book.isbn !== isbn);
+  // Find the index of the book to be removed
+  const bookIndex = library.findIndex((book) => book.isbn.toString() === isbn.toString());
 
-  // Update localStorage
-  localStorage.setItem("library", JSON.stringify(library));
 
-  // Remove the row from the table
-  row.remove();
-  console.log("row removed");
-}
+  if (bookIndex !== -1) {
+    // Remove the book from the library array using splice method
+    library.splice(bookIndex, 1);
+
+    // Update localStorage
+    localStorage.setItem("library", JSON.stringify(library));
+
+    // Remove the row from the table
+    row.remove();
+    console.log("row removed");
+    return;
+  } else {
+    console.log(`Book with ISBN ${isbn} not found in library`);
+    }
+  }
+});
+
 
 // function filterByReadingList() {
 //   const filteredLibrary = library.filter((book) => {
@@ -615,4 +622,3 @@ function deleteBookFromLibrary(row) {
 // renderTable(filteredLibrary, tbody);
 // library.forEach(book => cardContainer.appendChild(createCard(book)));
 
-});
