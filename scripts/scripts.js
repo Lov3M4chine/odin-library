@@ -847,22 +847,30 @@ document.addEventListener("DOMContentLoaded", () => {
         library.splice(bookIndex, 1);
         localStorage.setItem("library", JSON.stringify(library));
         loadData();
-
+      }
+  
+      // Check if the book is in the readingList and remove it
+      const readingListIndex = readingList.findIndex((book) => book.isbn === isbn);
+      if (readingListIndex !== -1) {
+        readingList.splice(readingListIndex, 1);
+        localStorage.setItem("readingList", JSON.stringify(readingList));
+        loadData();
       }
     } else if (activeLink === "readingListActive") {
-          const bookIndex = readingList.findIndex((book) => book.isbn === isbn);
-          if (bookIndex !== -1) {
-            readingList.splice(bookIndex, 1);
-            localStorage.setItem("readingList", JSON.stringify(readingList));
-            loadData();
-        }
+      const bookIndex = readingList.findIndex((book) => book.isbn === isbn);
+      if (bookIndex !== -1) {
+        readingList.splice(bookIndex, 1);
+        localStorage.setItem("readingList", JSON.stringify(readingList));
+        loadData();
+      }
     } else if (activeLink === "wishListActive") {
-        const bookIndex = wishList.findIndex((book) => book.isbn === isbn);
-        if (bookIndex !== -1) {
-          wishList.splice(bookIndex, 1);
-          localStorage.setItem("wishList", JSON.stringify(wishList));
-          loadData();
-        }
+      const bookIndex = wishList.findIndex((book) => book.isbn === isbn);
+      if (bookIndex !== -1) {
+        wishList.splice(bookIndex, 1);
+        localStorage.setItem("wishList", JSON.stringify(wishList));
+        loadData();
+      }
     }
   }
+  
 })
