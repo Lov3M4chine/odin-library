@@ -18,7 +18,7 @@ const tbody = document.querySelector("tbody");
 const tableViewBtn = document.getElementById("table-view-btn");
 const cardViewBtn = document.getElementById("card-view-btn");
 const cardContainer = document.getElementById("card-container");
-const library = JSON.parse(localStorage.getItem("library")) || [];
+let library = JSON.parse(localStorage.getItem("library")) || [];
 console.log("Initial library:", library);
 const readingList = JSON.parse(localStorage.getItem("readingList")) || [];
 const libraryData = localStorage.getItem("library");
@@ -93,20 +93,21 @@ form.classList.add("bg-white", "p-6", "rounded-md", "shadow-lg", "max-w-md", "w-
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     const formData = new FormData(form);
-    const title = formData.get("title");
-    const author = formData.get("author");
-    const genre = formData.get("genre");
-    const description = formData.get("description");
-    const coverURL = formData.get("coverURL");
+    const title = formData.get("title") || "Unknown";
+    const author = formData.get("author") || "Unknown";
+    const genre = formData.get("genre") || "Unknown";
+    const description = formData.get("description") || "Unknown";
+    const coverURL = formData.get("coverURL") || "https://via.placeholder.com/128x197?text=No%20Image";
     const isbn = formData.get("isbn") || generateUniqueIdentifier();
-    const totalPages = formData.get("totalPages");
-    const pagesRead = formData.get("pagesRead");
-    const isRead = formData.get("isRead");
-    const parsedtotalPages = isNaN(totalPages) ? "Unknown" : parseInt(totalPages);
+    const totalPages = formData.get("totalPages") || "Unknown";
+    const pagesRead = formData.get("pagesRead") || 0;
+    const isRead = formData.get("isRead") || false;
+    const parsedtotalPages = totalPages === "Unknown" ? "Unknown" : parseInt(totalPages);
     addBookToLibrary(isbn, title, author, genre, parsedtotalPages, description, coverURL, pagesRead, isRead);
     formContainer.remove();
     overlay.classList.add("hidden");
   });
+  
   
 });
 
@@ -514,7 +515,7 @@ function createRow(book) {
   } else {
     row.classList.add("bg-blue-700");
   }
-  
+ 
   return row;
 }
 
@@ -579,19 +580,15 @@ function addBookToWishlist(title, author, totalPages) {
 
 function deleteBookFromLibrary(row) {
   const isbn = row.dataset.isbn;
-  
-  // Find the index of the book to be removed
-  const bookIndex = library.findIndex((book) => book.isbn === isbn);
 
-  // Remove the book from the library array using splice method
-  library.splice(bookIndex, 1);
+  // Remove the book from the library array
+  library = library.filter((book) => book.isbn !== isbn);
 
   // Update localStorage
   localStorage.setItem("library", JSON.stringify(library));
 
   // Remove the row from the table
   row.remove();
-  location.reload();
   console.log("row removed");
 }
 
