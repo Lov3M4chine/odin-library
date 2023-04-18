@@ -28,6 +28,8 @@ const libraryLink = document.querySelector("#library-link");
 const wishList = JSON.parse(localStorage.getItem("wishList")) || [];
 const wishListLink = document.querySelector("#wish-list-link");
 
+
+
 document.addEventListener("DOMContentLoaded", () => {
 
   loadData();
@@ -55,13 +57,15 @@ document.addEventListener("DOMContentLoaded", () => {
   function loadData() {
     let data;
     // Get the container element for the cards and table
-    const cardContainer = document.querySelector("#card-container");
+    const cardContainer = document.getElementById("card-container");
   
     // Clear the existing cards and table rows
     if (cardContainer) {
       cardContainer.innerHTML = "";
     }
-    tbody.innerHTML = "";
+    if (tbody) {
+      tbody.innerHTML = "";
+    }
   
     // Get the data to load
     if (activeLink === "readingListActive") {
@@ -77,8 +81,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const card = createCard(book);
       cardContainer.appendChild(card);
   
-      const row = createRow(book);
-      tbody.appendChild(row);
+      const newRow = createLibraryRow(book, activeLink);
+      tbody.appendChild(newRow);
     });
   }
   
@@ -296,7 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return container;
   }
   
-
+  // *****Event Listeners*****
   tableViewBtn.addEventListener("click", () => {
     table.classList.remove("hidden");
     cardContainer.style.display = "none";
@@ -334,6 +338,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // ***** API Search Functions *****
   function performSearch() {
     const query = searchInput.value;
     const criteria = searchCriteria.value.toLowerCase();
@@ -479,52 +484,102 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
     
-  
-  function addBookToLibrary(book) {
-    // check if the book already exists in the library
-    const bookExists = library.some((existingBook) => existingBook.isbn === book.isbn);
-    
-    if (bookExists) {
-      // display a message and return without adding the book
-      alert(`The book '${book.title}' is already in your library.`);
-      return;
-    }
-  
-    // add the book to the library
-    library.push(book);
-  
-    localStorage.setItem("library", JSON.stringify(library));
-  
-    const newRow = createRow(book);
-    const newCard = createCard(book); // Create a card for the card view
-  
-    newCard.querySelector(".bg-red-600").addEventListener("click", () => {
-      deleteBook(book.isbn);
-      localStorage.setItem("readingList", JSON.stringify(readingList));
-    });
-  
-    cardContainer.appendChild(newCard);
-    tbody.appendChild(newRow);
-  
-    tbody.addEventListener("click", (event) => {
-      if (event.target.matches(".bg-red-600")) {
-        deleteBook(book.isbn);
-      }
-    });
-  
-    const checkbox = newRow.querySelector("input[type='checkbox']");
-    checkbox.addEventListener("change", (event) => {
-      book.isRead = event.target.checked;
-      localStorage.setItem("library", JSON.stringify(library));
-    });
+  function createCard(book) {
+    const description = truncateDescription(book);
+    const cardHTML = createCardHTML(book, description);
+    const card = createCardElement(book, cardHTML);
+    initializeCardBtns(book, card);
+    return card;
   }
   
+  function createLibraryRow(book, activeLink) {
+    const row = createRow(book);
+    createCells(book, row);
+    createButtons(book, row, activeLink);
+    initializeRowCounter(row);
+    return row;
+  }
 
+  // *****Table Creation Functions*****
   function createRow(book) {
-    const row = document.createElement("tr");
+    let row = document.createElement("tr");
     row.dataset.isbn = book.isbn;
     row.classList.add("text-white", "border-gray-600", "border-b");
+    return row;
+  }
 
+  function createCells (book, row) {
+    createTitleCell(book, row);
+    createAuthorCell(book, row);
+    createGenreCell(book, row);
+    createPagesReadCell(book, row);
+    createTotalPagesCell(book, row);
+    createReadCell(book, row);
+  }
+
+  function createButtons(book, row, activeLink) {
+    const btnContainer = createButtonContainer(row);
+    createReadingListBtn(book, row, btnContainer, activeLink);
+    createAddToLibrarybtn(book, row, btnContainer, activeLink);
+    createEditBtn(book, row, btnContainer, activeLink);
+    createDeleteBtn(book, row, btnContainer, activeLink);
+  }
+
+  function createButtonContainer(row) {
+    const btnContainer = document.createElement("div");
+    btnContainer.classList.add("flex", "gap-2", "ml-5");
+    row.querySelector(".justify-between").appendChild(btnContainer);
+    return btnContainer;
+  }
+
+  function createReadingListBtn(book, row, btnContainer, activeLink) {
+    if (activeLink === "libraryActive") {
+      const addToReadingListBtn = document.createElement("button");
+      addToReadingListBtn.className = "bg-green-600 text-white px-2 py-1 rounded";
+      addToReadingListBtn.textContent = "Reading List";
+      btnContainer.appendChild(addToReadingListBtn);
+      addToReadingListBtn.addEventListener("click", () => {
+        addBookToReadingList(book);
+      });
+    } else {
+        return}
+  }
+
+  function createAddToLibrarybtn(book, row, btnContainer, activeLink) {
+    if (activeLink === "wishListActive") {
+      const addToLibraryBtn = document.createElement("button");
+      addToLibraryBtn.className = "bg-green-600 text-white px-2 py-1 rounded";
+      addToLibraryBtn.textContent = "Add to Library";
+      btnContainer.appendChild(addToLibraryBtn);
+      addToLibraryBtn.addEventListener("click", () => {
+        deleteBook(book);
+        addBookToLibrary(book);
+      });
+    } else {
+        return}
+  }
+
+  function createEditBtn(book, row, btnContainer, activeLink) {
+    const editButton = document.createElement("button");
+    editButton.className = "bg-yellow-600 text-white px-2 py-1 rounded";
+    editButton.textContent = "Edit";
+    btnContainer.appendChild(editButton);
+    editButton.addEventListener("click", () => {
+      displayForm(book);
+    });
+  }
+
+  function createDeleteBtn(book, row, btnContainer, activeLink) {
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "bg-red-600 text-white px-2 py-1 rounded";
+    deleteButton.textContent = "Delete";
+    btnContainer.appendChild(deleteButton);
+    deleteButton.addEventListener("click", () => {
+      deleteBook(book.isbn);
+    });
+  }
+
+  function createTitleCell(book, row) {
     const titleCell = document.createElement("td");
     titleCell.textContent = book.title;
     titleCell.classList.add(
@@ -535,20 +590,29 @@ document.addEventListener("DOMContentLoaded", () => {
       "flex",
       "justify-between"
     );
+    row.appendChild(titleCell);
+  }
 
+  function createAuthorCell(book, row) {
     const authorCell = document.createElement("td");
     authorCell.textContent = book.author;
     authorCell.classList.add("px-2", "py-4", "border-gray-600", "border-r");
+    row.appendChild(authorCell);
+  }
 
+  function createGenreCell(book, row) {
     const genreCell = document.createElement("td");
     genreCell.textContent = book.genre;
     genreCell.classList.add("px-2", "py-4", "border-gray-600", "border-r");
+    row.appendChild(genreCell);
+  }
 
+  function createPagesReadCell(book, row) {
     const pagesRead = document.createElement("td");
     pagesRead.classList.add("text-center");
     const pagesReadInput = document.createElement("input");
     pagesReadInput.type = "number";
-    pagesReadInput.value = book.pagesRead; 
+    pagesReadInput.value = book.pagesRead;
     pagesReadInput.classList.add("bg-blue-900", "w-16", "text-white");
     pagesReadInput.addEventListener("input", () => {
       if (
@@ -558,7 +622,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
     pagesRead.appendChild(pagesReadInput);
+    row.appendChild(pagesRead);
+  }
 
+  function createTotalPagesCell(book, row) {
     const totalPagesCell = document.createElement("td");
     totalPagesCell.textContent = book.totalPages;
     totalPagesCell.classList.add(
@@ -568,7 +635,10 @@ document.addEventListener("DOMContentLoaded", () => {
       "border-gray-600",
       "border-r"
     );
+    row.appendChild(totalPagesCell);
+  }
 
+  function createReadCell(book, row) {
     const readCell = document.createElement("td");
     const readCheckbox = document.createElement("input");
     readCheckbox.type = "checkbox";
@@ -591,47 +661,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     readCheckbox.checked = book.isRead;
     readCell.appendChild(readCheckbox);
-
-    const btnContainer = document.createElement("div");
-    btnContainer.classList.add("flex", "gap-2", "ml-5");
-    titleCell.appendChild(btnContainer);
-
-    const addToReadingListBtn = document.createElement("button");
-      addToReadingListBtn.className =
-        "bg-green-600 text-white px-2 py-1 rounded";
-      addToReadingListBtn.textContent = "Reading List";
-      btnContainer.appendChild(addToReadingListBtn);
-      addToReadingListBtn.addEventListener("click", () => {
-        addBookToReadingList(book);
-      })
-
-    const editButton = document.createElement("button");
-    editButton.className = "bg-yellow-600 text-white px-2 py-1 rounded";
-    editButton.textContent = "Edit";
-    btnContainer.appendChild(editButton);
-    editButton.addEventListener("click", () => {
-      displayForm(book);
-      console.log(book)
-;    });
-    
-
-  
-    const deleteButton = document.createElement("button");
-    deleteButton.className = "bg-red-600 text-white px-2 py-1 rounded";
-    deleteButton.textContent = "Delete";
-    btnContainer.appendChild(deleteButton);
-
-    deleteButton.addEventListener("click", () => {
-      deleteBook(book.isbn);
-    });
-
-    row.appendChild(titleCell);
-    row.appendChild(authorCell);
-    row.appendChild(genreCell);
-    row.appendChild(pagesRead);
-    row.appendChild(totalPagesCell);
     row.appendChild(readCell);
+  }
 
+  function initializeRowCounter(row) {
     createRow.rowCounter = createRow.rowCounter ? createRow.rowCounter + 1 : 1;
 
     if (createRow.rowCounter % 2 === 0) {
@@ -639,30 +672,11 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       row.classList.add("bg-blue-700");
     }
-
-    return row;
   }
 
 
-  function updateBookInLibrary(oldBook, updatedBook) {
-  // Find the index of the old book in the library array
-  const index = library.findIndex(book => book.isbn === oldBook.isbn);
-
-  // Update the book in the library array
-  if (index !== -1) {
-    library[index] = updatedBook;
-  }
-
-  // Update the DOM to show the updated book
-  loadData();
-  // (You should replace this with your implementation)
-  console.log("Book updated:", updatedBook);
-}
-
-
-  function createCard(book, row) {
-    const MAX_DESCRIPTION_LENGTH = 100;
-
+  // *****Create cards*****
+  function createCardElement(book, cardHTML) {
     const card = document.createElement("div");
     card.classList.add(
       "flex",
@@ -676,38 +690,113 @@ document.addEventListener("DOMContentLoaded", () => {
       "m-4",
       "w-64"
     );
-
-    const description = book.description
-      ? book.description.slice(0, MAX_DESCRIPTION_LENGTH) + "..."
-      : "No description available";
-
-    card.innerHTML = `
-    <div class="card-container bg-white border border-gray-300 rounded-lg p-4 flex flex-col justify-between">
-      <div class="book-cover flex items-center justify-center">
-        <img class="rounded-md object-contain h-48 w-full" src="${book.coverURL}" alt="${book.title}">
-      </div>
-      <div class="book-details">
-        <h3 class="text-xl font-semibold mb-2">${book.title}</h3>
-        <h4 class="text-lg font-medium mb-2">${book.author}</h4>
-        <p class="text-gray-700 mb-2">${book.genre}</p>
-        <p class="text-gray-700 mb-2">${description}</p>
-        <p class="text-gray-700 mb-2">${book.totalPages} pages</p>
-      </div>
-      <div class="button-container flex justify-between mt-4">
-        <button class="bg-green-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">Add to Reading List</button>
-        <button id="delete-card-button" class="bg-red-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">Delete</button>
-      </div>
-    </div>
-`;
-
-    const deleteCardButton = card.querySelector("#delete-card-button");
-    deleteCardButton.addEventListener("click", () => {
-      deleteBook(book.isbn); 
-    });
-
+    card.appendChild(cardHTML);
+    const cardBtns = createCardBtns();
+    const buttonContainer = card.querySelector('.button-container');
+    buttonContainer.appendChild(cardBtns);
     return card;
   }
 
+  function truncateDescription(book) {
+    const MAX_DESCRIPTION_LENGTH = 100;
+    const description = book.description
+      ? book.description.slice(0, MAX_DESCRIPTION_LENGTH) + "..."
+      : "No description available";
+    return description;
+    }
+
+    function createCardHTML(book, description) {
+      const cardHTML = document.createElement("div");
+      cardHTML.classList.add("card-container", "bg-white", "border", "border-gray-300", "rounded-lg", "p-4", "flex", "flex-col", "justify-between");
+    
+      cardHTML.innerHTML = `
+        <div class="book-cover flex items-center justify-center">
+          <img class="rounded-md object-contain h-48 w-full" src="${book.coverURL}" alt="${book.title}">
+        </div>
+        <div class="book-details">
+          <h3 class="text-xl font-semibold mb-2">${book.title}</h3>
+          <h4 class="text-lg font-medium mb-2">${book.author}</h4>
+          <p class="text-gray-700 mb-2">${book.genre}</p>
+          <p class="text-gray-700 mb-2">${description}</p>
+          <p class="text-gray-700 mb-2">${book.totalPages} pages</p>
+        </div>
+        <div class="button-container flex justify-between mt-4" id="card-button-container">
+        </div>
+      `;
+    
+      return cardHTML;
+    }
+    
+    function createCardBtns() {
+      const buttonWrapper = document.createElement('div');
+    
+      if (activeLink === "libraryActive") {
+        const addToReadingListBtn = document.createElement('button');
+        addToReadingListBtn.classList.add("add-to-reading-list-button", "bg-green-600", "text-white", "px-4", "py-2", "rounded-md", "font-semibold", "hover:bg-green-700", "focus:outline-none", "focus:ring-2", "focus:ring-green-500", "focus:ring-offset-2");
+        addToReadingListBtn.innerText = "Add to Reading List";
+        buttonWrapper.appendChild(addToReadingListBtn);
+    
+        const deleteBtn = document.createElement('button');
+        deleteBtn.classList.add("delete-card-button", "bg-red-600", "text-white", "px-4", "py-2", "rounded-md", "font-semibold", "hover:bg-red-700", "focus:outline-none", "focus:ring-2", "focus:ring-red-500", "focus:ring-offset-2");
+        deleteBtn.innerText = "Delete";
+        buttonWrapper.appendChild(deleteBtn);
+    
+      } else if (activeLink === "readingListActive") {
+        const deleteBtn = document.createElement('button');
+        deleteBtn.classList.add("delete-card-button", "bg-red-600", "text-white", "px-4", "py-2", "rounded-md", "font-semibold", "hover:bg-red-700", "focus:outline-none", "focus:ring-2", "focus:ring-red-500", "focus:ring-offset-2");
+        deleteBtn.innerText = "Delete";
+        buttonWrapper.appendChild(deleteBtn);
+    
+      } else if (activeLink === "wishListActive") {
+        const addToLibraryBtn = document.createElement('button');
+        addToLibraryBtn.classList.add("add-to-library-button", "bg-green-600", "text-white", "px-4", "py-2", "rounded-md", "font-semibold", "hover:bg-green-700", "focus:outline-none", "focus:ring-2", "focus:ring-green-500", "focus:ring-offset-2");
+        addToLibraryBtn.innerText = "Add to Library";
+        buttonWrapper.appendChild(addToLibraryBtn);
+    
+        const deleteBtn = document.createElement('button');
+        deleteBtn.classList.add("delete-card-button", "bg-red-600", "text-white", "px-4", "py-2", "rounded-md", "font-semibold", "hover:bg-red-700", "focus:outline-none", "focus:ring-2", "focus:ring-red-500", "focus:ring-offset-2");
+        deleteBtn.innerText = "Delete";
+        buttonWrapper.appendChild(deleteBtn);
+      }
+    
+      return buttonWrapper;
+    }
+    
+
+    function initializeCardBtns (book, card) {
+      if (activeLink === "libraryActive") {
+        initializeCardReadingListBtn(book, card);
+        initializeCardDeleteBtn(book, card);
+      } else if (activeLink === "readingListActive") {
+          initializeCardDeleteBtn(book, card);
+      } else if (activeLink === "wishListActive") {
+        initializeCardAddToLibraryBtn(book);
+        initializeCardDeleteBtn(book, card);
+      }
+    }
+
+    function initializeCardReadingListBtn(book, card) {
+      const addToReadingListBtn = card.querySelector(".add-to-reading-list-button")
+      addToReadingListBtn.addEventListener("click", () => {
+        addBookToReadingList(book);
+      });
+    }
+  
+    function initializeCardAddToLibraryBtn(book, card) {
+      const addToLibraryBtn = card.querySelector(".add-to-library-button")
+      addToLibraryBtn.addEventListener("click", () => {
+        addToLibrary(book);
+      });
+    }
+  
+    function initializeCardDeleteBtn(book, card) {
+      const deleteBtn = card.querySelector(".delete-card-button")
+      deleteBtn.addEventListener("click", () => {
+        deleteBook(book.isbn);
+      })
+    } 
+
+  // *****Add to lists*****
   function addBookToReadingList(book) {
     const { isbn } = book;
     if (readingList.some(item => item.isbn === isbn)) {
@@ -716,10 +805,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     readingList.push(book);
     localStorage.setItem("readingList", JSON.stringify(readingList));
+    loadData();
   }
-  
-  
 
+  function addBookToLibrary(book) {
+    const { isbn } = book;
+    if (library.some(item => item.isbn === isbn)) {
+      alert(`${book.title} is already in the library`);
+      return;
+    } else if (activeLink === "wishListActive") {
+        library.push(book);
+        localStorage.setItem("library", JSON.stringify(library));
+        deleteBook(book);
+        loadData();
+    } else {
+        library.push(book);
+        localStorage.setItem("library", JSON.stringify(library));
+        loadData();
+    }
+  } 
+  
   function addBookToWishlist(book) {
     const { isbn } = book;
     if (wishList.some(item => item.isbn === isbn)) {
@@ -731,28 +836,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     wishList.push(book);
     localStorage.setItem("wishList", JSON.stringify(wishList));
+    loadData();
   }
 
+  // *****Remove from lists*****
   function deleteBook(isbn) {
-    if (activeLink === "readingListActive") {
-      const bookIndex = readingList.findIndex((book) => book.isbn === isbn);
+    if (activeLink === "libraryActive") {
+      let bookIndex = library.findIndex((book) => book.isbn === isbn);
       if (bookIndex !== -1) {
-        readingList.splice(bookIndex, 1);
-        localStorage.setItem("readingList", JSON.stringify(readingList));
+        library.splice(bookIndex, 1);
+        localStorage.setItem("library", JSON.stringify(library));
         loadData();
+
       }
-    } else if (activeLink === "libraryActive") {
-        let bookIndex = library.findIndex((book) => book.isbn === isbn);
-        if (bookIndex !== -1) {
-          library.splice(bookIndex, 1);
-          localStorage.setItem("library", JSON.stringify(library));
-          loadData();
-        }
-        bookIndex = readingList.findIndex((book) => book.isbn === isbn);
-        if (bookIndex !== -1) {
-          readingList.splice(bookIndex, 1);
-          localStorage.setItem("readingList", JSON.stringify(readingList));
-          loadData();
+    } else if (activeLink === "readingListActive") {
+          const bookIndex = readingList.findIndex((book) => book.isbn === isbn);
+          if (bookIndex !== -1) {
+            readingList.splice(bookIndex, 1);
+            localStorage.setItem("readingList", JSON.stringify(readingList));
+            loadData();
         }
     } else if (activeLink === "wishListActive") {
         const bookIndex = wishList.findIndex((book) => book.isbn === isbn);
