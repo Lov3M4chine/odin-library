@@ -578,10 +578,10 @@ function addBookToWishlist(title, author, totalPages) {
 }
 
 function deleteBookFromLibrary(row) {
-  const bookTitle = row.querySelector("td").textContent;
+  const isbn = row.dataset.isbn;
   
   // Find the index of the book to be removed
-  const bookIndex = library.findIndex((book) => book.title === bookTitle);
+  const bookIndex = library.findIndex((book) => book.isbn === isbn);
 
   // Remove the book from the library array using splice method
   library.splice(bookIndex, 1);
