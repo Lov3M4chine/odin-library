@@ -31,33 +31,85 @@ const wishListLink = document.querySelector("#wish-list-link");
 // *****Load initial library*****
 loadData();
 
-// Load the data from the libraries and display in table or cards
-function loadData() {
-  let data;
-  const cardContainer = document.getElementById("card-container");
+// *****Add to lists functions*****
+// These functions add the respective books to their respective libraries - then resets the page to show accurate content
 
-  if (cardContainer) {
-    cardContainer.innerHTML = "";
+function addBookToReadingList(book) {
+  const { isbn } = book;
+  if (readingList.some((item) => item.isbn === isbn)) {
+    alert(`${book.title} is already in the reading list`);
+    return;
   }
-  if (tbody) {
-    tbody.innerHTML = "";
-  }
+  readingList.push(book);
+  localStorage.setItem("readingList", JSON.stringify(readingList));
+  loadData();
+}
 
-  if (activeLink === "readingListActive") {
-    data = readingList;
-  } else if (activeLink === "libraryActive") {
-    data = library;
+function addBookToLibrary(book) {
+  const { isbn } = book;
+  if (library.some((item) => item.isbn === isbn)) {
+    alert(`${book.title} is already in the library`);
+    return;
   } else if (activeLink === "wishListActive") {
-    data = wishList;
+    library.push(book);
+    localStorage.setItem("library", JSON.stringify(library));
+    deleteBook(book);
+    loadData();
+  } else {
+    library.push(book);
+    localStorage.setItem("library", JSON.stringify(library));
+    loadData();
   }
+}
 
-  data.forEach((book) => {
-    const card = createCard(book);
-    cardContainer.appendChild(card);
+function addBookToWishlist(book) {
+  const { isbn } = book;
+  if (wishList.some((item) => item.isbn === isbn)) {
+    alert(`${book.title} is already in the wish list`);
+    return;
+  } else if (library.some((item) => item.isbn === isbn)) {
+    alert(`${book.title} is already in the library`);
+    return;
+  }
+  wishList.push(book);
+  localStorage.setItem("wishList", JSON.stringify(wishList));
+  loadData();
+}
 
-    const newRow = createLibraryRow(book, activeLink);
-    tbody.appendChild(newRow);
-  });
+// *****Remove from lists functions*****
+
+function deleteBook(isbn) {
+  if (activeLink === "libraryActive") {
+    let bookIndex = library.findIndex((book) => book.isbn === isbn);
+    if (bookIndex !== -1) {
+      library.splice(bookIndex, 1);
+      localStorage.setItem("library", JSON.stringify(library));
+      loadData();
+    }
+
+    const readingListIndex = readingList.findIndex(
+      (book) => book.isbn === isbn
+    );
+    if (readingListIndex !== -1) {
+      readingList.splice(readingListIndex, 1);
+      localStorage.setItem("readingList", JSON.stringify(readingList));
+      loadData();
+    }
+  } else if (activeLink === "readingListActive") {
+    const bookIndex = readingList.findIndex((book) => book.isbn === isbn);
+    if (bookIndex !== -1) {
+      readingList.splice(bookIndex, 1);
+      localStorage.setItem("readingList", JSON.stringify(readingList));
+      loadData();
+    }
+  } else if (activeLink === "wishListActive") {
+    const bookIndex = wishList.findIndex((book) => book.isbn === isbn);
+    if (bookIndex !== -1) {
+      wishList.splice(bookIndex, 1);
+      localStorage.setItem("wishList", JSON.stringify(wishList));
+      loadData();
+    }
+  }
 }
 
 
@@ -518,36 +570,11 @@ function displayResults(books) {
 
 // *****Table Creation Functions*****
 
-function createLibraryRow(book, activeLink) {
-  const row = createRow(book);
-  createCells(book, row);
-  createButtons(book, row, activeLink);
-  initializeRowCounter(row);
-  return row;
-}
-
 function createRow(book) {
   let row = document.createElement("tr");
   row.dataset.isbn = book.isbn;
   row.classList.add("text-white", "border-gray-600", "border-b");
   return row;
-}
-
-function createCells(book, row) {
-  createTitleCell(book, row);
-  createAuthorCell(book, row);
-  createGenreCell(book, row);
-  createPagesReadCell(book, row);
-  createTotalPagesCell(book, row);
-  createReadCell(book, row);
-}
-
-function createButtons(book, row, activeLink) {
-  const btnContainer = createButtonContainer(row);
-  createReadingListBtn(book, row, btnContainer, activeLink);
-  createAddToLibrarybtn(book, row, btnContainer, activeLink);
-  createEditBtn(book, row, btnContainer, activeLink);
-  createDeleteBtn(book, row, btnContainer, activeLink);
 }
 
 function createButtonContainer(row) {
@@ -701,36 +728,32 @@ function initializeRowCounter(row) {
   }
 }
 
+function createLibraryRow(book, activeLink) {
+  const row = createRow(book);
+  createCells(book, row);
+  createButtons(book, row, activeLink);
+  initializeRowCounter(row);
+  return row;
+}
+
+function createCells(book, row) {
+  createTitleCell(book, row);
+  createAuthorCell(book, row);
+  createGenreCell(book, row);
+  createPagesReadCell(book, row);
+  createTotalPagesCell(book, row);
+  createReadCell(book, row);
+}
+
+function createButtons(book, row, activeLink) {
+  const btnContainer = createButtonContainer(row);
+  createReadingListBtn(book, row, btnContainer, activeLink);
+  createAddToLibrarybtn(book, row, btnContainer, activeLink);
+  createEditBtn(book, row, btnContainer, activeLink);
+  createDeleteBtn(book, row, btnContainer, activeLink);
+}
+
 // *****Card Creation Fucntions*****
-
-function createCard(book) {
-  const description = truncateDescription(book);
-  const cardHTML = createCardHTML(book, description);
-  const card = createCardElement(book, cardHTML);
-  initializeCardBtns(book, card);
-  return card;
-}
-
-function createCardElement(book, cardHTML) {
-  const card = document.createElement("div");
-  card.classList.add(
-    "flex",
-    "flex-col",
-    "items-center",
-    "justify-stretch",
-    "bg-white",
-    "rounded",
-    "shadow-lg",
-    "p-4",
-    "m-4",
-    "w-64"
-  );
-  card.appendChild(cardHTML);
-  const cardBtns = createCardBtns();
-  const buttonContainer = card.querySelector(".button-container");
-  buttonContainer.appendChild(cardBtns);
-  return card;
-}
 
 function truncateDescription(book) {
   const MAX_DESCRIPTION_LENGTH = 100;
@@ -770,6 +793,27 @@ function createCardHTML(book, description) {
       `;
 
   return cardHTML;
+}
+
+function createCardElement(book, cardHTML) {
+  const card = document.createElement("div");
+  card.classList.add(
+    "flex",
+    "flex-col",
+    "items-center",
+    "justify-stretch",
+    "bg-white",
+    "rounded",
+    "shadow-lg",
+    "p-4",
+    "m-4",
+    "w-64"
+  );
+  card.appendChild(cardHTML);
+  const cardBtns = createCardBtns();
+  const buttonContainer = card.querySelector(".button-container");
+  buttonContainer.appendChild(cardBtns);
+  return card;
 }
 
 // Determines which buttons get added depending on which page/link we are on (Reading List, Library,or Wishlist)
@@ -902,93 +946,64 @@ function initializeCardBtns(book, card) {
   } else if (activeLink === "readingListActive") {
     initializeCardDeleteBtn(book, card);
   } else if (activeLink === "wishListActive") {
-    initializeCardAddToLibraryBtn(book);
+    initializeCardAddToLibraryBtn(book, card);
     initializeCardDeleteBtn(book, card);
   }
 }
 
-// *****Add to lists functions*****
-// These functions add the respective books to their respective libraries - then resets the page to show accurate content
-
-function addBookToReadingList(book) {
-  const { isbn } = book;
-  if (readingList.some((item) => item.isbn === isbn)) {
-    alert(`${book.title} is already in the reading list`);
-    return;
-  }
-  readingList.push(book);
-  localStorage.setItem("readingList", JSON.stringify(readingList));
-  loadData();
+function createCard(book) {
+  const description = truncateDescription(book);
+  const cardHTML = createCardHTML(book, description);
+  const card = createCardElement(book, cardHTML);
+  initializeCardBtns(book, card);
+  return card;
 }
 
-function addBookToLibrary(book) {
-  const { isbn } = book;
-  if (library.some((item) => item.isbn === isbn)) {
-    alert(`${book.title} is already in the library`);
-    return;
+// Load the data from the libraries and display in table or cards
+function loadData() {
+  let data;
+  const cardContainer = document.getElementById("card-container");
+
+  if (cardContainer) {
+    cardContainer.innerHTML = "";
+  }
+  if (tbody) {
+    tbody.innerHTML = "";
+  }
+
+  if (activeLink === "readingListActive") {
+    data = readingList;
+  } else if (activeLink === "libraryActive") {
+    data = library;
   } else if (activeLink === "wishListActive") {
-    library.push(book);
-    localStorage.setItem("library", JSON.stringify(library));
-    deleteBook(book);
-    loadData();
-  } else {
-    library.push(book);
-    localStorage.setItem("library", JSON.stringify(library));
-    loadData();
+    data = wishList;
   }
-}
 
-function addBookToWishlist(book) {
-  const { isbn } = book;
-  if (wishList.some((item) => item.isbn === isbn)) {
-    alert(`${book.title} is already in the wish list`);
-    return;
-  } else if (library.some((item) => item.isbn === isbn)) {
-    alert(`${book.title} is already in the library`);
-    return;
-  }
-  wishList.push(book);
-  localStorage.setItem("wishList", JSON.stringify(wishList));
-  loadData();
-}
+  data.forEach((book) => {
+    const card = createCard(book);
+    cardContainer.appendChild(card);
 
-// *****Remove from lists functions*****
-
-function deleteBook(isbn) {
-  if (activeLink === "libraryActive") {
-    let bookIndex = library.findIndex((book) => book.isbn === isbn);
-    if (bookIndex !== -1) {
-      library.splice(bookIndex, 1);
-      localStorage.setItem("library", JSON.stringify(library));
-      loadData();
-    }
-
-    const readingListIndex = readingList.findIndex(
-      (book) => book.isbn === isbn
-    );
-    if (readingListIndex !== -1) {
-      readingList.splice(readingListIndex, 1);
-      localStorage.setItem("readingList", JSON.stringify(readingList));
-      loadData();
-    }
-  } else if (activeLink === "readingListActive") {
-    const bookIndex = readingList.findIndex((book) => book.isbn === isbn);
-    if (bookIndex !== -1) {
-      readingList.splice(bookIndex, 1);
-      localStorage.setItem("readingList", JSON.stringify(readingList));
-      loadData();
-    }
-  } else if (activeLink === "wishListActive") {
-    const bookIndex = wishList.findIndex((book) => book.isbn === isbn);
-    if (bookIndex !== -1) {
-      wishList.splice(bookIndex, 1);
-      localStorage.setItem("wishList", JSON.stringify(wishList));
-      loadData();
-    }
-  }
+    const newRow = createLibraryRow(book, activeLink);
+    tbody.appendChild(newRow);
+  });
 }
 
 // *****Event Listeners*****
+
+searchInput.addEventListener('input', () => {
+  const searchText = searchInput.value.trim().toLowerCase();
+  const bookList = document.querySelectorAll(`#${activeLink} tbody tr`);
+  bookList.forEach((book) => {
+      const title = book.querySelector('td:nth-child(1)').textContent.toLowerCase();
+      const author = book.querySelector('td:nth-child(2)').textContent.toLowerCase();
+      const genre = book.querySelector('td:nth-child(3)').textContent.toLowerCase();
+      if (title.includes(searchText) || author.includes(searchText) || genre.includes(searchText)) {
+          book.style.display = 'table-row';
+      } else {
+          book.style.display = 'none';
+      }
+  });
+});
 
 manualBtn.addEventListener("click", () => {
   displayForm();
