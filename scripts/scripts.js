@@ -440,37 +440,45 @@ document.addEventListener("DOMContentLoaded", () => {
   }
     
   
-
   function addBookToLibrary(book) {
+    // check if the book already exists in the library
+    const bookExists = library.some((existingBook) => existingBook.isbn === book.isbn);
+    
+    if (bookExists) {
+      // display a message and return without adding the book
+      alert(`The book '${book.title}' is already in your library.`);
+      return;
+    }
+  
+    // add the book to the library
     library.push(book);
-
+  
     localStorage.setItem("library", JSON.stringify(library));
-
+  
     const newRow = createRow(book);
     const newCard = createCard(book); // Create a card for the card view
-
-
+  
     newCard.querySelector(".bg-red-600").addEventListener("click", () => {
       deleteBook(book.isbn);
       localStorage.setItem("readingList", JSON.stringify(readingList));
     });
-
+  
     cardContainer.appendChild(newCard);
-
     tbody.appendChild(newRow);
-
+  
     tbody.addEventListener("click", (event) => {
       if (event.target.matches(".bg-red-600")) {
         deleteBook(book.isbn);
       }
     });
-
+  
     const checkbox = newRow.querySelector("input[type='checkbox']");
     checkbox.addEventListener("change", (event) => {
       book.isRead = event.target.checked;
       localStorage.setItem("library", JSON.stringify(library));
     });
   }
+  
 
   function createRow(book) {
     const row = document.createElement("tr");
