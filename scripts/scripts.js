@@ -23,26 +23,29 @@ console.log("Initial library:", library);
 const readingList = JSON.parse(localStorage.getItem("readingList")) || [];
 const libraryData = localStorage.getItem("library");
 const readingListLink = document.querySelector("#reading-list-link");
-let isReadingListActive = false;
+let activeLink = "libraryActive";
 const libraryLink = document.querySelector("#library-link");
+const wishList = JSON.parse(localStorage.getItem("wishList")) || [];
+const wishListLink = document.querySelector("#wish-list-link");
 
 document.addEventListener("DOMContentLoaded", () => {
 
   loadData();
 
   readingListLink.addEventListener("click", () => {
-    isReadingListActive = true;
+    activeLink = "readingListActive";
     loadData();
     console.log("Initial readingList:", readingList)
   });
 
   libraryLink.addEventListener("click", () => {
-    isReadingListActive = false;
+    activeLink = "libraryActive";
     loadData();
     console.log("Initial library:", library)
   });
   
   function loadData() {
+    let data;
     // Get the container element for the cards and table
     const cardContainer = document.querySelector("#card-container");
   
@@ -53,7 +56,13 @@ document.addEventListener("DOMContentLoaded", () => {
     tbody.innerHTML = "";
   
     // Get the data to load
-    const data = isReadingListActive ? readingList : library;
+    if (activeLink === "readingListActive") {
+      data = readingList;
+    } else if (activeLink === "libraryActive") {
+      data = library;
+    } else if (activeLink === "wishListActive") {
+      data = wishList;
+    }
   
     // Loop through the data and create cards and table rows for each book
     data.forEach((book) => {
@@ -657,26 +666,33 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function deleteBook(isbn) {
-    if (isReadingListActive) {
+    if (activeLink === "readingListActive") {
       const bookIndex = readingList.findIndex((book) => book.isbn === isbn);
       if (bookIndex !== -1) {
         readingList.splice(bookIndex, 1);
         localStorage.setItem("readingList", JSON.stringify(readingList));
         loadData();
       }
-    } else {
-      let bookIndex = library.findIndex((book) => book.isbn === isbn);
-      if (bookIndex !== -1) {
-        library.splice(bookIndex, 1);
-        localStorage.setItem("library", JSON.stringify(library));
-        loadData();
-      }
-      bookIndex = readingList.findIndex((book) => book.isbn === isbn);
-      if (bookIndex !== -1) {
-        readingList.splice(bookIndex, 1);
-        localStorage.setItem("readingList", JSON.stringify(readingList));
-        loadData();
-      }
+    } else if (activeLink === "libraryActive") {
+        let bookIndex = library.findIndex((book) => book.isbn === isbn);
+        if (bookIndex !== -1) {
+          library.splice(bookIndex, 1);
+          localStorage.setItem("library", JSON.stringify(library));
+          loadData();
+        }
+        bookIndex = readingList.findIndex((book) => book.isbn === isbn);
+        if (bookIndex !== -1) {
+          readingList.splice(bookIndex, 1);
+          localStorage.setItem("readingList", JSON.stringify(readingList));
+          loadData();
+        }
+    } else if (activeLink === "wishListActive") {
+        const bookIndex = wishList.findIndex((book) => book.isbn === isbn);
+        if (bookIndex !== -1) {
+          wishList.splice(bookIndex, 1);
+          localStorage.setItem("wishList", JSON.stringify(wishList));
+          loadData();
+        }
     }
   }
 })
