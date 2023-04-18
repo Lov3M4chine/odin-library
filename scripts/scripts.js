@@ -765,21 +765,21 @@ function createCardHTML(book, description) {
   const cardHTML = document.createElement("div");
   cardHTML.classList.add(
     "card-container",
-    "bg-white",
     "border",
     "border-gray-300",
     "rounded-lg",
     "p-4",
     "flex",
     "flex-col",
-    "justify-between"
+    "justify-between",
+    "bg-slate-200"
   );
 
   cardHTML.innerHTML = `
         <div class="book-cover flex items-center justify-center">
           <img class="rounded-md object-contain h-48 w-full" src="${book.coverURL}" alt="${book.title}">
         </div>
-        <div class="book-details">
+        <div class="book-details p-2 border-solid rounded border-gray-800 border-4 mt-6">
           <h3 class="text-xl font-semibold mb-2">${book.title}</h3>
           <h4 class="text-lg font-medium mb-2">${book.author}</h4>
           <p class="text-gray-700 mb-2">${book.genre}</p>
@@ -805,7 +805,8 @@ function createCardElement(book, cardHTML) {
     "shadow-lg",
     "p-4",
     "m-4",
-    "w-64"
+    "w-64",
+    "bg-teal-800"
   );
   card.appendChild(cardHTML);
   const cardBtns = createCardBtns();
