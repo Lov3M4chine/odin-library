@@ -82,10 +82,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
   
-   
-  
-
-  manualBtn.addEventListener("click", () => {
+  function displayForm(book) {
+    overlay.classList.remove("hidden");
     const formContainer = document.createElement("div");
     formContainer.classList.add(
       "fixed",
@@ -107,44 +105,44 @@ document.addEventListener("DOMContentLoaded", () => {
       "w-96",
       "relative"
     );
-
-    const titleInput = createFormInput("Title", "text", "Unknown", "title");
-    const authorInput = createFormInput("Author", "text", "Unknown", "author");
-    const genreInput = createFormInput("Genre", "text", "Unknown", "genre");
+  
+    const titleInput = createFormInput("Title", "text", book ? book.title : "Unknown", "title");
+    const authorInput = createFormInput("Author", "text", book ? book.author : "Unknown", "author");
+    const genreInput = createFormInput("Genre", "text", book ? book.genre : "Unknown", "genre");
     const descriptionInput = createFormInput(
       "Description",
       "textarea",
-      "No description available",
+      book ? book.description : "No description available",
       "description"
     );
     const coverInput = createFormInput(
       "Cover URL",
       "text",
-      "https://via.placeholder.com/128x197?text=No%20Image",
+      book ? book.coverURL : "https://via.placeholder.com/128x197?text=No%20Image",
       "coverURL"
     );
     const isbnInput = createFormInput(
       "ISBN #",
       "number",
-      generateUniqueIdentifier(),
+      book ? book.isbn : generateUniqueIdentifier(),
       "isbn"
     );
     const totalPagesInput = createFormInput(
       "Page Count",
       "text",
-      "Unknown",
+      book ? book.totalPages : "",
       "totalPages"
     );
     const pagesReadInput = createFormInput(
       "Pages Read",
       "number",
-      "0",
+      book ? book.pagesRead : "0",
       "pagesRead"
     );
     const isReadInput = createFormInput(
       "Is Read?",
       "checkbox",
-      false,
+      book ? book.isRead : false,
       "isRead"
     );
 
@@ -174,51 +172,71 @@ document.addEventListener("DOMContentLoaded", () => {
       "hover:bg-blue-600",
       "transition-colors"
     );
-    submitButton.textContent = "Add Book";
-
-    const buttonContainer = document.createElement("div");
-    buttonContainer.classList.add("flex", "justify-between", "mt-4");
-    buttonContainer.append(closeButton, submitButton);
-
-    form.append(
-      closeButton,
-      titleInput,
-      authorInput,
-      genreInput,
-      descriptionInput,
-      coverInput,
-      isbnInput,
-      totalPagesInput,
-      pagesReadInput,
-      isReadInput,
-      buttonContainer
-    );
+    submitButton.textContent = book ? "Update Book" : "Add Book";
+  
+    form.appendChild(titleInput);
+    form.appendChild(authorInput);
+    form.appendChild(genreInput);
+    form.appendChild(descriptionInput);
+    form.appendChild(coverInput);
+    form.appendChild(isbnInput);
+    form.appendChild(totalPagesInput);
+    form.appendChild(pagesReadInput);
+    form.appendChild(isReadInput);
+    form.appendChild(closeButton);
+    form.appendChild(submitButton);
     formContainer.appendChild(form);
-
-    overlay.classList.remove("hidden");
-    newBookModal.classList.add("hidden");
     document.body.appendChild(formContainer);
 
+
+  
     form.addEventListener("submit", (event) => {
       event.preventDefault();
-      const formData = new FormData(form);
-      const title = formData.get("title") || "Unknown";
-      const author = formData.get("author") || "Unknown";
-      const genre = formData.get("genre") || "Unknown";
-      const description = formData.get("description") || "Unknown";
-      const coverURL =
-        formData.get("coverURL") ||
-        "https://via.placeholder.com/128x197?text=No%20Image";
-      const isbn = formData.get("isbn") || generateUniqueIdentifier();
-      const totalPages = formData.get("totalPages") || "Unknown";
-      const pagesRead = formData.get("pagesRead") || 0;
-      const isRead = formData.get("isRead") || false;
-      const parsedtotalPages =
-        totalPages === "Unknown" ? "Unknown" : parseInt(totalPages);
-      addBookToLibrary(book);
+
+      const title = titleInput.querySelector("input").value;
+      const author = authorInput.querySelector("input").value;
+      const genre = genreInput.querySelector("input").value;
+      const description = descriptionInput.children[1].value;
+      const coverURL = coverInput.querySelector("input").value;
+      const isbn = parseInt(isbnInput.querySelector("input").value);
+      const totalPages = totalPagesInput.querySelector("input").value;
+      const parsedtotalPages = totalPages === "Unknown" || totalPages === "" ? "Unknown" : parseInt(totalPages);
+      const pagesRead = parseInt(pagesReadInput.querySelector("input").value);
+      const isRead = isReadInput.querySelector("input").checked;
+  
+      if (book) {
+        updateBookInLibrary(book, {
+          title,
+          author,
+          genre,
+          description,
+          coverURL,
+          isbn,
+          totalPages: parsedtotalPages,
+          pagesRead,
+          isRead,
+        });
+      } else {
+        addBookToLibrary({
+          title,
+          author,
+          genre,
+          description,
+          coverURL,
+          isbn,
+          totalPages: parsedtotalPages,
+          pagesRead,
+          isRead,
+        });
+      }
       formContainer.remove();
       overlay.classList.add("hidden");
     });
+  }
+
+  manualBtn.addEventListener("click", () => {
+    displayForm();
+    newBookModal.classList.add("hidden");
   });
 
   function generateUniqueIdentifier() {
@@ -229,7 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const label = document.createElement("label");
     label.textContent = labelText;
     label.classList.add("block", "font-semibold", "mb-2");
-
+  
     const input = document.createElement("input");
     input.type = inputType;
     input.classList.add(
@@ -243,19 +261,23 @@ document.addEventListener("DOMContentLoaded", () => {
     input.placeholder = defaultValue || "";
     input.required = false;
     input.name = name || "";
-
+  
+    if (defaultValue !== undefined && inputType !== "checkbox") {
+      input.value = defaultValue;
+    }
+  
     input.addEventListener("focus", () => {
       if (input.value === defaultValue) {
         input.value = "";
       }
     });
-
+  
     input.addEventListener("blur", () => {
       if (input.value === "") {
-        input.value = defaultValue;
+        input.value = defaultValue || "";
       }
     });
-
+  
     if (inputType === "number") {
       input.addEventListener("input", () => {
         const value = parseInt(input.value);
@@ -266,13 +288,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     }
-
+  
     const container = document.createElement("div");
     container.appendChild(label);
     container.appendChild(input);
-
+  
     return container;
   }
+  
 
   tableViewBtn.addEventListener("click", () => {
     table.classList.remove("hidden");
@@ -582,6 +605,17 @@ document.addEventListener("DOMContentLoaded", () => {
         addBookToReadingList(book);
       })
 
+    const editButton = document.createElement("button");
+    editButton.className = "bg-yellow-600 text-white px-2 py-1 rounded";
+    editButton.textContent = "Edit";
+    btnContainer.appendChild(editButton);
+    editButton.addEventListener("click", () => {
+      displayForm(book);
+      console.log(book)
+;    });
+    
+
+  
     const deleteButton = document.createElement("button");
     deleteButton.className = "bg-red-600 text-white px-2 py-1 rounded";
     deleteButton.textContent = "Delete";
@@ -608,6 +642,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     return row;
   }
+
+
+  function updateBookInLibrary(oldBook, updatedBook) {
+  // Find the index of the old book in the library array
+  const index = library.findIndex(book => book.isbn === oldBook.isbn);
+
+  // Update the book in the library array
+  if (index !== -1) {
+    library[index] = updatedBook;
+  }
+
+  // Update the DOM to show the updated book
+  loadData();
+  // (You should replace this with your implementation)
+  console.log("Book updated:", updatedBook);
+}
+
 
   function createCard(book, row) {
     const MAX_DESCRIPTION_LENGTH = 100;
@@ -660,7 +711,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function addBookToReadingList(book) {
     const { isbn } = book;
     if (readingList.some(item => item.isbn === isbn)) {
-      console.log(`${book.title} is already in the reading list`);
+      alert(`${book.title} is already in the reading list`);
       return;
     }
     readingList.push(book);
@@ -672,7 +723,10 @@ document.addEventListener("DOMContentLoaded", () => {
   function addBookToWishlist(book) {
     const { isbn } = book;
     if (wishList.some(item => item.isbn === isbn)) {
-      console.log(`${book.title} is already in the wish list`);
+      alert(`${book.title} is already in the wish list`);
+      return;
+    } else if (library.some(item => item.isbn === isbn)) {
+      alert(`${book.title} is already in the library`);
       return;
     }
     wishList.push(book);
