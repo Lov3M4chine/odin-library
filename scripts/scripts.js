@@ -6,7 +6,7 @@ const searchModal = document.getElementById("search-modal");
 const manualBtn = document.getElementById("manual-btn");
 const closeSearchModal = document.getElementById("close-search-modal");
 const overlay = document.getElementById("overlay");
-const searchInput = document.getElementById("search-input");
+const googleBooksSearchInput = document.getElementById("google-books-search-input");
 const searchCriteria = document.getElementById("search-criteria");
 const addBookBtn = document.getElementById("add-book-btn");
 const searchResults = document.createElement("div");
@@ -18,6 +18,7 @@ const tbody = document.querySelector("tbody");
 const tableViewBtn = document.getElementById("table-view-btn");
 const cardViewBtn = document.getElementById("card-view-btn");
 const cardContainer = document.getElementById("card-container");
+const librarySearchFilter = document.getElementById("library-search-filter");
 let library = JSON.parse(localStorage.getItem("library")) || [];
 console.log("Initial library:", library);
 const readingList = JSON.parse(localStorage.getItem("readingList")) || [];
@@ -27,9 +28,6 @@ let activeLink = "libraryActive";
 const libraryLink = document.querySelector("#library-link");
 const wishList = JSON.parse(localStorage.getItem("wishList")) || [];
 const wishListLink = document.querySelector("#wish-list-link");
-
-// *****Load initial library*****
-loadData();
 
 // *****Add to lists functions*****
 // These functions add the respective books to their respective libraries - then resets the page to show accurate content
@@ -424,7 +422,7 @@ function createFormInput(labelText, inputType, defaultValue, name) {
 // ***** API Search Functions *****
 
 function performSearch() {
-  const query = searchInput.value;
+  const query = googleBooksSearchInput.value;
   const criteria = searchCriteria.value.toLowerCase();
   const url = `https://www.googleapis.com/books/v1/volumes?q=${criteria}:${query}&key=${API_KEY}`;
 
@@ -990,20 +988,50 @@ function loadData() {
 
 // *****Event Listeners*****
 
-searchInput.addEventListener('input', () => {
-  const searchText = searchInput.value.trim().toLowerCase();
-  const bookList = document.querySelectorAll(`#${activeLink} tbody tr`);
+function getBookList(activeLink) {
+  if (activeLink === "libraryActive") {
+    return library;
+  } else if (activeLink === "readingListActive") {
+    return readingList;
+  } else if (activeLink === "wishListActive") {
+    return wishList;
+  }
+}
+
+librarySearchFilter.addEventListener('input', () => {
+  const searchText = librarySearchFilter.value.trim().toLowerCase();
+  const bookList = getBookList(activeLink);
+  userSearchResults = [];
   bookList.forEach((book) => {
-      const title = book.querySelector('td:nth-child(1)').textContent.toLowerCase();
-      const author = book.querySelector('td:nth-child(2)').textContent.toLowerCase();
-      const genre = book.querySelector('td:nth-child(3)').textContent.toLowerCase();
-      if (title.includes(searchText) || author.includes(searchText) || genre.includes(searchText)) {
-          book.style.display = 'table-row';
-      } else {
-          book.style.display = 'none';
+      const title = book.title.toLowerCase();
+      const author = book.author.toLowerCase();
+      const genre = book.genre.toLowerCase();
+      if (title.includes(searchText) || author.includes(searchText) || genre.includes(searchText)) 
+      {
+        userSearchResults.push(book);
       }
   });
+  loadUserSearchData();
 });
+
+function loadUserSearchData() {
+  const cardContainer = document.getElementById("card-container");
+
+  if (cardContainer) {
+    cardContainer.innerHTML = "";
+  }
+  if (tbody) {
+    tbody.innerHTML = "";
+  }
+
+  userSearchResults.forEach((book) => {
+    const card = createCard(book);
+    cardContainer.appendChild(card);
+
+    const newRow = createLibraryRow(book, activeLink);
+    tbody.appendChild(newRow);
+  });
+}
 
 manualBtn.addEventListener("click", () => {
   displayForm();
@@ -1059,8 +1087,11 @@ closeSearchModal.addEventListener("click", () => {
   searchModal.classList.add("hidden");
 });
 
-searchInput.addEventListener("keyup", (e) => {
+googleBooksSearchInput.addEventListener("keyup", (e) => {
   if (e.key === "Enter") {
     performSearch();
   }
 });
+
+// *****Load initial library*****
+loadData();
